@@ -1,0 +1,99 @@
+.mfe {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.mfe__tabs {
+  display: flex;
+  gap: 8px;
+}
+
+.mfe__tab {
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 13px;
+}
+
+.mfe__tab.is-active {
+  background: #0f172a;
+  color: #f8fafc;
+  border-color: #0f172a;
+}
+
+.mfe__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: #0f172a;
+}
+
+.mfe__label {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 13px;
+  color: #475569;
+}
+
+.mfe__input {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 8px 10px;
+  font-size: 14px;
+}
+
+.mfe__button {
+  align-self: flex-start;
+  border: none;
+  background: #2563eb;
+  color: #f8fafc;
+  padding: 10px 16px;
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.mfe__button:hover {
+  background: #1d4ed8;
+}
+
+.mfe__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.mfe__list-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: #f8fafc;
+}
+
+.mfe__list-item span {
+  display: block;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.mfe__ghost {
+  border: 1px solid #cbd5f5;
+  background: #fff;
+  color: #0f172a;
+  padding: 6px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.mfe__ghost:hover {
+  border-color: #94a3b8;
+}

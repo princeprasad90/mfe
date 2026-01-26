@@ -1,0 +1,13 @@
+{
+  "name": "mfe-workspace",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:shell": "npm run dev -w apps/shell",
+    "dev:cbms": "npm run dev -w apps/cbms",
+    "dev:cdts": "npm run dev -w apps/cdts"
+  }
+}

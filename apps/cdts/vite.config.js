@@ -9,7 +9,7 @@ export default defineConfig({
       name: "cdtsApp",
       filename: "remoteEntry.js",
       exposes: {
-        "./CdtsApp": "./src/CdtsApp.tsx"
+        "./CdtsApp": "./src/CdtsApp.jsx"
       },
       shared: ["react", "react-dom", "@mfe/notification-sdk"]
     })

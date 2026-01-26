@@ -1,0 +1,20 @@
+{
+  "name": "@mfe/cbms",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@mfe/notification-sdk": "0.1.0",
+    "react": "18.2.0",
+    "react-dom": "18.2.0"
+  },
+  "devDependencies": {
+    "@originjs/vite-plugin-federation": "1.3.5",
+    "@vitejs/plugin-react": "4.3.1",
+    "vite": "5.3.2"
+  }
+}

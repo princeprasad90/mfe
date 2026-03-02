@@ -25,8 +25,15 @@ const loadScript = (remoteEntry: string, scope: string) => {
     script.type = "module";
     script.src = remoteEntry;
     script.dataset.remoteEntry = remoteEntry;
-    script.onload = () => resolve();
-    script.onerror = () => reject(new Error(`Failed to load ${scope} from ${remoteEntry}`));
+    script.onload = () => {
+      console.info("[shell] Remote entry script loaded", { scope, remoteEntry });
+      resolve();
+    };
+    script.onerror = () => {
+      const error = new Error(`Failed to load ${scope} from ${remoteEntry}`);
+      console.error("[shell] Remote entry script failed", { scope, remoteEntry, error });
+      reject(error);
+    };
     document.head.appendChild(script);
   });
 
@@ -35,10 +42,12 @@ const loadScript = (remoteEntry: string, scope: string) => {
 };
 
 export const loadRemoteVite = async <TModule = any>(remoteEntry: string, scope: string, module: string): Promise<TModule> => {
+  console.info("[shell] Loading remote module", { scope, module, remoteEntry });
   await loadScript(remoteEntry, scope);
 
   let container = remoteContainers.get(remoteEntry) || (window as any)[scope];
   if (!container?.get) {
+    console.warn("[shell] Container not found on window after script load, trying dynamic import", { scope, remoteEntry });
     const imported = await importRemoteModule(remoteEntry);
     if (imported?.get) {
       container = imported as RemoteContainer;
@@ -48,6 +57,7 @@ export const loadRemoteVite = async <TModule = any>(remoteEntry: string, scope: 
   }
 
   if (!container?.get) {
+    console.error("[shell] Remote container missing get()", { scope, remoteEntry, windowContainer: (window as any)[scope] });
     throw new Error(`Remote container ${scope} is not available on window`);
   }
 
@@ -57,5 +67,6 @@ export const loadRemoteVite = async <TModule = any>(remoteEntry: string, scope: 
   }
 
   const moduleFactory = await container.get(module);
+  console.info("[shell] Remote module factory resolved", { scope, module, remoteEntry });
   return moduleFactory();
 };

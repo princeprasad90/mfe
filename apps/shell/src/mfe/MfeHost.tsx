@@ -5,6 +5,8 @@ import { useShellStore } from "../stores/shellStore";
 
 type Props = { path: string };
 
+const normalizePath = (value: string) => value.split("?")[0].replace(/\/$/, "") || "/";
+
 const MfeHost = ({ path }: Props) => {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const rootRef = useRef<Root | null>(null);
@@ -14,19 +16,28 @@ const MfeHost = ({ path }: Props) => {
 
   useEffect(() => {
     const renderMfe = async () => {
-      const menu = menus.find((item) => path === item.Url || path.startsWith(`${item.Url}/`));
+      const normalizedPath = normalizePath(path);
+      const menu = menus.find((item) => {
+        const menuPath = normalizePath(item.Url);
+        return normalizedPath === menuPath || normalizedPath.startsWith(`${menuPath}/`);
+      });
       if (!menu || !hostRef.current) {
-        setError("No micro frontend found for this path.");
+        const message = "No micro frontend found for this path.";
+        console.error("[shell] MFE route did not match any menu", { path, menus });
+        setError(message);
         return;
       }
 
       const config = manifest[menu.MfeConfig.Scope];
       if (!config) {
-        setError("MFE configuration missing in manifest.");
+        const message = "MFE configuration missing in manifest.";
+        console.error("[shell] MFE manifest configuration missing", { path, menu, manifest });
+        setError(message);
         return;
       }
 
       try {
+        console.info("[shell] Rendering micro frontend", { path, menu, config });
         setError(null);
         const remoteModule = await loadRemoteVite<any>(config.RemoteEntry, config.Scope, config.Module);
         const RemoteComponent = remoteModule.default || remoteModule;
@@ -39,7 +50,9 @@ const MfeHost = ({ path }: Props) => {
         rootRef.current = createRoot(mountNode);
         rootRef.current.render(<RemoteComponent routePath={path} basePath={menu.Url} />);
       } catch (err) {
-        setError((err as Error).message);
+        const error = err as Error;
+        console.error("[shell] Failed to render micro frontend", { path, menu, config, error });
+        setError(`Unable to load micro frontend: ${error.message}. Check browser console for details.`);
       }
     };
 

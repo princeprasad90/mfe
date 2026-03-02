@@ -3,13 +3,13 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { ModuleFederationPlugin } = require("webpack").container;
 
 module.exports = {
-  entry: path.resolve(__dirname, "src", "index.js"),
+  entry: path.resolve(__dirname, "src", "index.tsx"),
   output: {
     publicPath: "auto",
     clean: true
   },
   resolve: {
-    extensions: [".js", ".jsx"]
+    extensions: [".ts", ".tsx", ".js", ".jsx"]
   },
   devServer: {
     port: 3000,
@@ -19,12 +19,12 @@ module.exports = {
   module: {
     rules: [
       {
-        test: /\.jsx?$/,
+        test: /\.(t|j)sx?$/,
         exclude: /node_modules/,
         use: {
           loader: "babel-loader",
           options: {
-            presets: ["@babel/preset-env", "@babel/preset-react"]
+            presets: ["@babel/preset-env", "@babel/preset-react", "@babel/preset-typescript"]
           }
         }
       },
@@ -37,14 +37,9 @@ module.exports = {
   plugins: [
     new ModuleFederationPlugin({
       name: "shell",
-      remotes: {
-        cbmsApp: "cbmsApp@http://localhost:3001/assets/remoteEntry.js",
-        cdtsApp: "cdtsApp@http://localhost:3002/assets/remoteEntry.js"
-      },
       shared: {
         react: { singleton: true, requiredVersion: "18.2.0" },
-        "react-dom": { singleton: true, requiredVersion: "18.2.0" },
-        "@mfe/notification-sdk": { singleton: true }
+        "react-dom": { singleton: true, requiredVersion: "18.2.0" }
       }
     }),
     new HtmlWebpackPlugin({

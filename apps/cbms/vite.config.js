@@ -10,8 +10,7 @@ export default defineConfig({
       filename: "remoteEntry.js",
       exposes: {
         "./CbmsApp": "./src/CbmsApp.tsx"
-      },
-      shared: ["react", "react-dom", "@mfe/notification-sdk"]
+      }
     })
   ],
   server: {

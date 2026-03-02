@@ -1,114 +1,68 @@
-import React, { useEffect, useState } from "react";
-import { notify } from "@mfe/notification-sdk";
+import React, { useMemo } from "react";
 import "./cdts.css";
 
-type Page = "maker" | "checker";
-
-type Task = {
-  id: string;
-  name: string;
-  owner: string;
+type Props = {
+  routePath?: string;
+  basePath?: string;
 };
 
-const CdtsApp = () => {
-  const [page, setPage] = useState<Page>("maker");
-  const [tasks, setTasks] = useState<Task[]>([]);
+type Task = { id: number; title: string; owner: string; priority: string };
 
-  useEffect(() => {
-    const loadTasks = async () => {
-      try {
-        const response = await fetch("/api/cdts/tasks");
-        if (!response.ok) {
-          throw new Error("Failed to load CDTS tasks");
-        }
-        const data = (await response.json()) as Task[];
-        setTasks(data);
-      } catch (error) {
-        setTasks([]);
-      }
-    };
+const PAGE_SIZE = 4;
+const tasks: Task[] = Array.from({ length: 18 }, (_, index) => ({
+  id: index + 1,
+  title: `Verification Task ${index + 1}`,
+  owner: `Analyst ${index % 6}`,
+  priority: index % 3 === 0 ? "High" : "Normal"
+}));
 
-    loadTasks();
-  }, []);
+const CdtsApp = ({ routePath = "/tasks", basePath = "/tasks" }: Props) => {
+  const detailMatch = routePath.match(/\/details\/(\d+)/);
+  const detailId = detailMatch ? Number(detailMatch[1]) : null;
+  const detailTask = tasks.find((item) => item.id === detailId);
+
+  const pageMatch = routePath.match(/[?&]page=(\d+)/);
+  const currentPage = Math.max(1, Number(pageMatch?.[1] || 1));
+  const totalPages = Math.ceil(tasks.length / PAGE_SIZE);
+
+  const pagedItems = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return tasks.slice(start, start + PAGE_SIZE);
+  }, [currentPage]);
+
+  const goTo = (path: string) => {
+    window.location.hash = `#${path}`;
+  };
+
+  if (detailTask) {
+    return (
+      <div className="mfe">
+        <h2>Task Details</h2>
+        <p><strong>ID:</strong> {detailTask.id}</p>
+        <p><strong>Title:</strong> {detailTask.title}</p>
+        <p><strong>Owner:</strong> {detailTask.owner}</p>
+        <p><strong>Priority:</strong> {detailTask.priority}</p>
+        <button className="mfe__button" onClick={() => goTo(`${basePath}?page=${currentPage}`)}>Back to Listing</button>
+      </div>
+    );
+  }
 
   return (
     <div className="mfe">
-      <div className="mfe__tabs">
-        <button
-          className={`mfe__tab ${page === "maker" ? "is-active" : ""}`}
-          onClick={() => setPage("maker")}
-        >
-          Profile Maker
-        </button>
-        <button
-          className={`mfe__tab ${page === "checker" ? "is-active" : ""}`}
-          onClick={() => setPage("checker")}
-        >
-          Profile Checker
-        </button>
+      <h2>Tasks Listing</h2>
+      <ul className="mfe__list">
+        {pagedItems.map((task) => (
+          <li key={task.id} className="mfe__list-item">
+            <span>{task.title}</span>
+            <button className="mfe__ghost" onClick={() => goTo(`${basePath}/details/${task.id}?page=${currentPage}`)}>Details</button>
+          </li>
+        ))}
+      </ul>
+      <div className="mfe__pager">
+        <button className="mfe__ghost" disabled={currentPage <= 1} onClick={() => goTo(`${basePath}?page=${currentPage - 1}`)}>Previous</button>
+        <span>Page {currentPage} of {totalPages}</span>
+        <button className="mfe__ghost" disabled={currentPage >= totalPages} onClick={() => goTo(`${basePath}?page=${currentPage + 1}`)}>Next</button>
       </div>
-
-      {page === "maker" ? (
-        <div className="mfe__panel">
-          <h3>Maker Studio</h3>
-          <p>Draft customer profiles for CDTS onboarding.</p>
-          <label className="mfe__label">
-            Client ID
-            <input className="mfe__input" placeholder="Enter client ID" />
-          </label>
-          <label className="mfe__label">
-            Verification Level
-            <select className="mfe__input">
-              <option>Standard</option>
-              <option>Enhanced</option>
-              <option>Expedited</option>
-            </select>
-          </label>
-          <button
-            className="mfe__button"
-            onClick={() =>
-              notify({
-                title: "CDTS Draft Saved",
-                message: "Profile sent for checker review.",
-                variant: "success"
-              })
-            }
-          >
-            Send to Checker
-          </button>
-        </div>
-      ) : (
-        <div className="mfe__panel">
-          <h3>Checker Desk</h3>
-          <p>Validate CDTS submissions awaiting approval.</p>
-          {tasks.length === 0 ? (
-            <p className="mfe__empty">No tasks loaded yet.</p>
-          ) : (
-            <ul className="mfe__list">
-              {tasks.map((task) => (
-                <li key={task.id} className="mfe__list-item">
-                  <div>
-                    <strong>{task.name}</strong>
-                    <span>{task.owner}</span>
-                  </div>
-                  <button
-                    className="mfe__ghost"
-                    onClick={() =>
-                      notify({
-                        title: "CDTS Case Verified",
-                        message: `${task.name} verified.`,
-                        variant: "warning"
-                      })
-                    }
-                  >
-                    Verify
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
     </div>
   );
 };

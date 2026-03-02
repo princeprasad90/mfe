@@ -1,57 +1,27 @@
-import React, { Suspense } from "react";
-import { notify } from "@mfe/notification-sdk";
+import React, { useEffect, useMemo, useState } from "react";
+import { bootstrapShell } from "./bootstrap/bootstrapShell";
+import ShellLayout from "./layout/ShellLayout";
 
-const CbmsApp = React.lazy(() => import("cbmsApp/CbmsApp"));
-const CdtsApp = React.lazy(() => import("cdtsApp/CdtsApp"));
+const getCurrentPath = () => {
+  const hashPath = window.location.hash.replace(/^#/, "") || "/payments";
+  return hashPath.startsWith("/") ? hashPath : `/${hashPath}`;
+};
 
 const App = () => {
-  return (
-    <div className="shell">
-      <header className="shell__header">
-        <div>
-          <p className="shell__eyebrow">MFE Shell</p>
-          <h1>Operations Console</h1>
-          <p className="shell__subtitle">
-            The shell sets the application style while CBMS and CDTS load in
-            dedicated tiles below.
-          </p>
-        </div>
-        <button
-          className="shell__notify"
-          onClick={() =>
-            notify({
-              title: "Shell Notification",
-              message: "Shell-triggered notification from the SDK.",
-              variant: "success"
-            })
-          }
-        >
-          Trigger Notification
-        </button>
-      </header>
+  const [path, setPath] = useState(getCurrentPath());
 
-      <main className="shell__grid">
-        <section className="shell__tile">
-          <div className="shell__tile-header">
-            <h2>CBMS</h2>
-            <span className="shell__tile-tag">Customer Banking</span>
-          </div>
-          <Suspense fallback={<p>Loading CBMS...</p>}>
-            <CbmsApp />
-          </Suspense>
-        </section>
-        <section className="shell__tile">
-          <div className="shell__tile-header">
-            <h2>CDTS</h2>
-            <span className="shell__tile-tag">Data Tracking</span>
-          </div>
-          <Suspense fallback={<p>Loading CDTS...</p>}>
-            <CdtsApp />
-          </Suspense>
-        </section>
-      </main>
-    </div>
-  );
+  useEffect(() => {
+    bootstrapShell();
+  }, []);
+
+  useEffect(() => {
+    const onHashChange = () => setPath(getCurrentPath());
+    window.addEventListener("hashchange", onHashChange);
+    return () => window.removeEventListener("hashchange", onHashChange);
+  }, []);
+
+  const normalizedPath = useMemo(() => path, [path]);
+  return <ShellLayout path={normalizedPath} />;
 };
 
 export default App;

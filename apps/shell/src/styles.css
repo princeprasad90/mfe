@@ -14,6 +14,11 @@ body {
   padding: 16px 20px;
 }
 
+.shell__header p {
+  margin: 4px 0 0;
+  opacity: 0.8;
+}
+
 .shell__menu {
   display: flex;
   gap: 8px;
@@ -28,6 +33,14 @@ body {
   border-radius: 6px;
   padding: 8px 12px;
   cursor: pointer;
+  color: inherit;
+  text-decoration: none;
+}
+
+.shell__menu-item.is-active {
+  background: #111827;
+  color: white;
+  border-color: #111827;
 }
 
 .shell__content {

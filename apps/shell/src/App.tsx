@@ -1,28 +1,33 @@
-import React, { useEffect, useMemo, useState } from "react";
-import { bootstrapShell } from "./bootstrap/bootstrapShell";
-import ShellLayout from "./layout/ShellLayout";
+import React from "react";
+import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
+import Menu from "./Menu";
+import RemoteComponent from "./RemoteComponent";
+import { mfeConfig } from "./mfe-config";
 
-const getCurrentPath = () => {
+export default function App() {
+  return (
+    <BrowserRouter>
+      <div className="shell">
+        <header className="shell__header">
+          <h1>MFE Shell</h1>
+          <p>Dynamic runtime micro frontend loader</p>
+        </header>
 
-  const hashPath = window.location.hash.replace(/^#/, "") || "/payments";
-  return hashPath.startsWith("/") ? hashPath : `/${hashPath}`;
-};
+        <Menu />
 
-const App = () => {
-  const [path, setPath] = useState(getCurrentPath());
-
-  useEffect(() => {
-    bootstrapShell();
-  }, []);
-
-  useEffect(() => {
-    const onHashChange = () => setPath(getCurrentPath());
-    window.addEventListener("hashchange", onHashChange);
-    return () => window.removeEventListener("hashchange", onHashChange);
-  }, []);
-
-  const normalizedPath = useMemo(() => path, [path]);
-  return <ShellLayout path={normalizedPath} />;
-};
-
-export default App;
+        <main className="shell__content">
+          <Routes>
+            {mfeConfig.map((mfe) => (
+              <Route
+                key={mfe.name}
+                path={mfe.route}
+                element={<RemoteComponent name={mfe.name} remoteEntry={mfe.remoteEntry} scope={mfe.scope} exposedModule={mfe.exposedModule} />}
+              />
+            ))}
+            <Route path="*" element={<Navigate to={mfeConfig[0].route} replace />} />
+          </Routes>
+        </main>
+      </div>
+    </BrowserRouter>
+  );
+}

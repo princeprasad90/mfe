@@ -10,8 +10,7 @@ export default defineConfig({
       filename: "remoteEntry.js",
       exposes: {
         "./CdtsApp": "./src/CdtsApp.tsx"
-      },
-      shared: ["react", "react-dom", "@mfe/notification-sdk"]
+      }
     })
   ],
   server: {

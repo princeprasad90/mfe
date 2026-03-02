@@ -26,3 +26,9 @@ npm run dev:shell
 ```
 
 Then open `http://localhost:3000`.
+
+## Remote deployment notes
+
+- Build each Vite remote before deploying (`npm run build -w apps/cbms` and `npm run build -w apps/cdts`).
+- Deploy the generated `dist` output so the shell can fetch built federation assets.
+- Configure shell menu entries to use `/assets/remoteEntry.js` for Vite remotes.

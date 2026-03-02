@@ -3,6 +3,7 @@ import react from "@vitejs/plugin-react";
 import federation from "@originjs/vite-plugin-federation";
 
 export default defineConfig({
+  base: "./",
   plugins: [
     react(),
     federation({
@@ -10,12 +11,17 @@ export default defineConfig({
       filename: "remoteEntry.js",
       exposes: {
         "./CbmsApp": "./src/CbmsApp.tsx"
-      }
+      },
+      shared: ["react", "react-dom"]
     })
   ],
   server: {
     host: "0.0.0.0",
-    port: 3001
+    port: 3001,
+    cors: true
+  },
+  preview: {
+    cors: true
   },
   build: {
     target: "esnext"

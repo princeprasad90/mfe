@@ -51,6 +51,11 @@ export const loadRemoteVite = async <TModule = any>(remoteEntry: string, scope: 
     throw new Error(`Remote container ${scope} is not available on window`);
   }
 
+  const shareScope = (globalThis as any).__webpack_share_scopes__?.default;
+  if (container.init && shareScope) {
+    await container.init(shareScope);
+  }
+
   const moduleFactory = await container.get(module);
   return moduleFactory();
 };

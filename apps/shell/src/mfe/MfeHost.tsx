@@ -5,28 +5,6 @@ import { useShellStore } from "../stores/shellStore";
 
 type Props = { path: string };
 
-const injectRemoteCss = async (remoteEntry: string, shadowRoot: ShadowRoot) => {
-  const origin = new URL(remoteEntry).origin;
-  const candidates = [`${origin}/src/index.css`, `${origin}/dist/assets/index.css`];
-
-  for (const cssUrl of candidates) {
-    try {
-      const response = await fetch(cssUrl);
-      if (!response.ok) {
-        continue;
-      }
-      const cssText = await response.text();
-      const styleTag = document.createElement("style");
-      styleTag.dataset.mfeCss = cssUrl;
-      styleTag.textContent = cssText;
-      shadowRoot.appendChild(styleTag);
-      return;
-    } catch {
-      // ignore and try next candidate
-    }
-  }
-};
-
 const MfeHost = ({ path }: Props) => {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const rootRef = useRef<Root | null>(null);
@@ -53,12 +31,9 @@ const MfeHost = ({ path }: Props) => {
         const remoteModule = await loadRemoteVite<any>(config.RemoteEntry, config.Scope, config.Module);
         const RemoteComponent = remoteModule.default || remoteModule;
 
-        const shadowRoot = hostRef.current.shadowRoot || hostRef.current.attachShadow({ mode: "open" });
-        shadowRoot.innerHTML = "";
-        await injectRemoteCss(config.RemoteEntry, shadowRoot);
-
+        hostRef.current.innerHTML = "";
         const mountNode = document.createElement("div");
-        shadowRoot.appendChild(mountNode);
+        hostRef.current.appendChild(mountNode);
 
         rootRef.current?.unmount();
         rootRef.current = createRoot(mountNode);

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { loadRemote } from "./mfe-loader";
+import { loadRemoteVite } from "./mfe/loadRemoteVite";
 
 type Props = {
   name: string;
@@ -8,29 +8,8 @@ type Props = {
   exposedModule: string;
 };
 
-const resolveRemoteModule = async (scope: string, exposedModule: string) => {
-  const webpackGlobal = window as Window & {
-    [key: string]: any;
-    __webpack_init_sharing__?: (scope: string) => Promise<void>;
-  };
-
-  const container = webpackGlobal[scope];
-
-  if (!container?.get) {
-    throw new Error(`Remote container '${scope}' is not available on window.`);
-  }
-
-  if (typeof webpackGlobal.__webpack_init_sharing__ === "function") {
-    await webpackGlobal.__webpack_init_sharing__("default");
-  }
-
-  const shareScope = (globalThis as any).__webpack_share_scopes__?.default;
-  if (container.init && shareScope) {
-    await container.init(shareScope);
-  }
-
-  const factory = await container.get(exposedModule);
-  const module = factory();
+const resolveRemoteModule = async (remoteEntry: string, scope: string, exposedModule: string) => {
+  const module = await loadRemoteVite(remoteEntry, scope, exposedModule);
   return module.default || module;
 };
 
@@ -45,8 +24,7 @@ export default function RemoteComponent({ name, remoteEntry, scope, exposedModul
       try {
         console.info("[shell] Loading remote component", { name, scope, remoteEntry, exposedModule });
         setError(null);
-        await loadRemote(name, remoteEntry);
-        const remoteModule = await resolveRemoteModule(scope, exposedModule);
+        const remoteModule = await resolveRemoteModule(remoteEntry, scope, exposedModule);
 
         if (mounted) {
           console.info("[shell] Remote component resolved", { name, scope, exposedModule });

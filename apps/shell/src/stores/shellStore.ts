@@ -30,8 +30,28 @@ const PROFILE_KEY = "shell_profileId";
 const cacheKey = (appId: string, profileId: string) => `menu_${appId}_${profileId}`;
 
 const defaultMenus: MenuItem[] = [
-  { Id: "1", Title: "Payments", Url: "/payments", Sequence: 1, MfeConfig: { RemoteEntry: "https://mfe-cbms.vercel.app/assets/remoteEntry.js", Scope: "cbmsApp", Module: "./CbmsApp" } },
-  { Id: "2", Title: "Tasks", Url: "/tasks", Sequence: 2, MfeConfig: { RemoteEntry: "https://mfe-cdts.vercel.app/assets/remoteEntry.js", Scope: "cdtsApp", Module: "./CdtsApp" } }
+  {
+    Id: "1",
+    Title: "Payments",
+    Url: "/payments",
+    Sequence: 1,
+    MfeConfig: {
+      RemoteEntry: "https://mfe-cbms.vercel.app/assets/remoteEntry.js",
+      Scope: "cbmsApp",
+      Module: "./CbmsApp"
+    }
+  },
+  {
+    Id: "2",
+    Title: "Tasks",
+    Url: "/tasks",
+    Sequence: 2,
+    MfeConfig: {
+      RemoteEntry: "https://mfe-cdts.vercel.app/assets/remoteEntry.js",
+      Scope: "cdtsApp",
+      Module: "./CdtsApp"
+    }
+  }
 ];
 
 const buildManifest = (menus: MenuItem[]) =>
@@ -62,7 +82,12 @@ export const useShellStore = create<ShellState>((set) => ({
       const menus = [...response.data].sort((a, b) => a.Sequence - b.Sequence);
       sessionStorage.setItem(menuStorageKey, JSON.stringify(menus));
       set({ menus, mfeManifest: buildManifest(menus), loading: false });
-    } catch {
+    } catch (error) {
+      console.error("[shell] Falling back to default menus because menu API failed", {
+        appId,
+        profileId,
+        error
+      });
       const menus = defaultMenus;
       sessionStorage.setItem(menuStorageKey, JSON.stringify(menus));
       set({ menus, mfeManifest: buildManifest(menus), loading: false });

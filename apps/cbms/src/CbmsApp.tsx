@@ -1,110 +1,68 @@
-import React, { useEffect, useState } from "react";
-import { notify } from "@mfe/notification-sdk";
+import React, { useMemo } from "react";
 import "./cbms.css";
 
-type Page = "maker" | "checker";
-
-type Profile = {
-  id: string;
-  name: string;
-  role: string;
+type Props = {
+  routePath?: string;
+  basePath?: string;
 };
 
-const CbmsApp = () => {
-  const [page, setPage] = useState<Page>("maker");
-  const [profiles, setProfiles] = useState<Profile[]>([]);
+type Payment = { id: number; customer: string; amount: number; status: string };
 
-  useEffect(() => {
-    const loadProfiles = async () => {
-      try {
-        const response = await fetch("/api/cbms/profiles");
-        if (!response.ok) {
-          throw new Error("Failed to load CBMS profiles");
-        }
-        const data = (await response.json()) as Profile[];
-        setProfiles(data);
-      } catch (error) {
-        setProfiles([]);
-      }
-    };
+const PAGE_SIZE = 5;
+const payments: Payment[] = Array.from({ length: 23 }, (_, index) => ({
+  id: index + 1,
+  customer: `Customer ${index + 1}`,
+  amount: 500 + (index + 1) * 35,
+  status: index % 2 === 0 ? "Pending" : "Approved"
+}));
 
-    loadProfiles();
-  }, []);
+const CbmsApp = ({ routePath = "/payments", basePath = "/payments" }: Props) => {
+  const detailMatch = routePath.match(/\/details\/(\d+)/);
+  const detailId = detailMatch ? Number(detailMatch[1]) : null;
+  const detailItem = payments.find((item) => item.id === detailId);
+
+  const pageMatch = routePath.match(/[?&]page=(\d+)/);
+  const currentPage = Math.max(1, Number(pageMatch?.[1] || 1));
+  const totalPages = Math.ceil(payments.length / PAGE_SIZE);
+
+  const pagedItems = useMemo(() => {
+    const start = (currentPage - 1) * PAGE_SIZE;
+    return payments.slice(start, start + PAGE_SIZE);
+  }, [currentPage]);
+
+  const goTo = (path: string) => {
+    window.location.hash = `#${path}`;
+  };
+
+  if (detailItem) {
+    return (
+      <div className="mfe">
+        <h2>Payment Details</h2>
+        <p><strong>ID:</strong> {detailItem.id}</p>
+        <p><strong>Customer:</strong> {detailItem.customer}</p>
+        <p><strong>Amount:</strong> ${detailItem.amount}</p>
+        <p><strong>Status:</strong> {detailItem.status}</p>
+        <button className="mfe__button" onClick={() => goTo(`${basePath}?page=${currentPage}`)}>Back to Listing</button>
+      </div>
+    );
+  }
 
   return (
     <div className="mfe">
-      <div className="mfe__tabs">
-        <button
-          className={`mfe__tab ${page === "maker" ? "is-active" : ""}`}
-          onClick={() => setPage("maker")}
-        >
-          Profile Maker
-        </button>
-        <button
-          className={`mfe__tab ${page === "checker" ? "is-active" : ""}`}
-          onClick={() => setPage("checker")}
-        >
-          Profile Checker
-        </button>
+      <h2>Payments Listing</h2>
+      <ul className="mfe__list">
+        {pagedItems.map((payment) => (
+          <li key={payment.id} className="mfe__list-item">
+            <span>{payment.customer} - ${payment.amount}</span>
+            <button className="mfe__ghost" onClick={() => goTo(`${basePath}/details/${payment.id}?page=${currentPage}`)}>Details</button>
+          </li>
+        ))}
+      </ul>
+      <div className="mfe__pager">
+        <button className="mfe__ghost" disabled={currentPage <= 1} onClick={() => goTo(`${basePath}?page=${currentPage - 1}`)}>Previous</button>
+        <span>Page {currentPage} of {totalPages}</span>
+        <button className="mfe__ghost" disabled={currentPage >= totalPages} onClick={() => goTo(`${basePath}?page=${currentPage + 1}`)}>Next</button>
       </div>
-
-      {page === "maker" ? (
-        <div className="mfe__panel">
-          <h3>Maker Workspace</h3>
-          <p>Create new customer profiles for the CBMS queue.</p>
-          <label className="mfe__label">
-            Full Name
-            <input className="mfe__input" placeholder="Enter customer name" />
-          </label>
-          <label className="mfe__label">
-            Risk Notes
-            <textarea className="mfe__input" rows={3} placeholder="Add notes" />
-          </label>
-          <button
-            className="mfe__button"
-            onClick={() =>
-              notify({
-                title: "CBMS Profile Created",
-                message: "Profile submitted to checker queue.",
-                variant: "success"
-              })
-            }
-          >
-            Submit to Checker
-          </button>
-        </div>
-      ) : (
-        <div className="mfe__panel">
-          <h3>Checker Queue</h3>
-          <p>Review the latest CBMS profile submissions.</p>
-          {profiles.length === 0 ? (
-            <p className="mfe__empty">No profiles loaded yet.</p>
-          ) : (
-            <ul className="mfe__list">
-              {profiles.map((profile) => (
-                <li key={profile.id} className="mfe__list-item">
-                  <div>
-                    <strong>{profile.name}</strong>
-                    <span>{profile.role}</span>
-                  </div>
-                  <button
-                    className="mfe__ghost"
-                    onClick={() =>
-                      notify({
-                        title: "CBMS Profile Approved",
-                        message: `${profile.name} approved successfully.`,
-                        variant: "info"
-                      })
-                    }
-                  >
-                    Approve
-                  </button>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
     </div>
   );
 };

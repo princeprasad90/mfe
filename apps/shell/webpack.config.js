@@ -3,7 +3,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { ModuleFederationPlugin } = require("webpack").container;
 
 module.exports = {
-  entry: path.resolve(__dirname, "src", "index.tsx"),
+  entry: path.resolve(__dirname, "src", "main.tsx"),
   output: {
     publicPath: "auto",
     clean: true

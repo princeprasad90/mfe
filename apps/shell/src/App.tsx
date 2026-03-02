@@ -3,7 +3,8 @@ import { bootstrapShell } from "./bootstrap/bootstrapShell";
 import ShellLayout from "./layout/ShellLayout";
 
 const getCurrentPath = () => {
-  const hashPath = window.location.hash.replace(/^#/, "") || "/";
+
+  const hashPath = window.location.hash.replace(/^#/, "") || "/payments";
   return hashPath.startsWith("/") ? hashPath : `/${hashPath}`;
 };
 

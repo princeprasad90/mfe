@@ -3,6 +3,8 @@ type RemoteContainer = {
   init?: (...args: any[]) => Promise<void> | void;
 };
 
+const importRemoteModule = (remoteEntry: string) => import(/* webpackIgnore: true */ remoteEntry);
+
 const remotePromises = new Map<string, Promise<void>>();
 const remoteContainers = new Map<string, RemoteContainer>();
 
@@ -37,7 +39,7 @@ export const loadRemoteVite = async <TModule = any>(remoteEntry: string, scope: 
 
   let container = remoteContainers.get(remoteEntry) || (window as any)[scope];
   if (!container?.get) {
-    const imported = await import(/* @vite-ignore */ remoteEntry);
+    const imported = await importRemoteModule(remoteEntry);
     if (imported?.get) {
       container = imported as RemoteContainer;
       remoteContainers.set(remoteEntry, container);

@@ -29,6 +29,23 @@ const APP_KEY = "shell_appId";
 const PROFILE_KEY = "shell_profileId";
 const cacheKey = (appId: string, profileId: string) => `menu_${appId}_${profileId}`;
 
+const normalizeRemoteEntry = (remoteEntry: string) => {
+  const trimmed = remoteEntry.trim();
+  if (trimmed.endsWith("/remoteEntry.js") && !trimmed.includes("/assets/")) {
+    return trimmed.replace(/\/remoteEntry\.js$/, "/assets/remoteEntry.js");
+  }
+  return trimmed;
+};
+
+const normalizeMenus = (menus: MenuItem[]) =>
+  menus.map((menu) => ({
+    ...menu,
+    MfeConfig: {
+      ...menu.MfeConfig,
+      RemoteEntry: normalizeRemoteEntry(menu.MfeConfig.RemoteEntry)
+    }
+  }));
+
 const defaultMenus: MenuItem[] = [
   {
     Id: "1",
@@ -73,13 +90,13 @@ export const useShellStore = create<ShellState>((set) => ({
     try {
       const cached = sessionStorage.getItem(menuStorageKey);
       if (cached) {
-        const menus = JSON.parse(cached) as MenuItem[];
+        const menus = normalizeMenus(JSON.parse(cached) as MenuItem[]);
         set({ menus, mfeManifest: buildManifest(menus), loading: false });
         return;
       }
 
       const response = await axios.get<MenuItem[]>(`/shell/apps/${appId}/profiles/${profileId}/menus`);
-      const menus = [...response.data].sort((a, b) => a.Sequence - b.Sequence);
+      const menus = normalizeMenus([...response.data].sort((a, b) => a.Sequence - b.Sequence));
       sessionStorage.setItem(menuStorageKey, JSON.stringify(menus));
       set({ menus, mfeManifest: buildManifest(menus), loading: false });
     } catch (error) {
@@ -88,7 +105,7 @@ export const useShellStore = create<ShellState>((set) => ({
         profileId,
         error
       });
-      const menus = defaultMenus;
+      const menus = normalizeMenus(defaultMenus);
       sessionStorage.setItem(menuStorageKey, JSON.stringify(menus));
       set({ menus, mfeManifest: buildManifest(menus), loading: false });
     }

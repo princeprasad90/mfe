@@ -9,11 +9,11 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular-builders/custom-webpack:browser",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
             "outputPath": "dist/mfe-products-angular",
             "index": "src/index.html",
-            "main": "src/main.ts",
+            "browser": "src/main.ts",
             "polyfills": [
               "zone.js"
             ],
@@ -25,37 +25,11 @@
             "styles": [
               "src/styles.scss"
             ],
-            "scripts": [],
-            "outputHashing": "none",
-            "customWebpackConfig": {
-              "path": "webpack.config.js"
-            }
-          },
-          "configurations": {
-            "production": {
-              "optimization": true,
-              "extractLicenses": false,
-              "sourceMap": false
-            },
-            "development": {
-              "optimization": false,
-              "extractLicenses": false,
-              "sourceMap": true
-            }
-          },
-          "defaultConfiguration": "production"
+            "scripts": []
+          }
         },
         "serve": {
-          "builder": "@angular-builders/custom-webpack:dev-server",
-          "configurations": {
-            "production": {
-              "browserTarget": "mfe-products-angular:build:production"
-            },
-            "development": {
-              "browserTarget": "mfe-products-angular:build:development"
-            }
-          },
-          "defaultConfiguration": "development"
+          "builder": "@angular-devkit/build-angular:dev-server"
         }
       }
     }

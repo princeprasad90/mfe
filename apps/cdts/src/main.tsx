@@ -1,7 +1,8 @@
-import React from "react";
-import { createRoot } from "react-dom/client";
-import CdtsApp from "./CdtsApp";
 import "./cdts.css";
+import { mount } from "./bootstrap";
 
-const root = createRoot(document.getElementById("root") as HTMLElement);
-root.render(<CdtsApp />);
+const container = document.getElementById("root");
+
+if (container) {
+  mount(container);
+}

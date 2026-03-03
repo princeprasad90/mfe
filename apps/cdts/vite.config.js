@@ -10,21 +10,7 @@ export default defineConfig({
       name: "cdtsApp",
       filename: "remoteEntry.js",
       exposes: {
-        "./CdtsApp": "./src/CdtsApp.tsx"
-      },
-      shared: {
-        react: {
-          singleton: true,
-          import: false,
-          requiredVersion: false,
-          generate: false
-        },
-        "react-dom": {
-          singleton: true,
-          import: false,
-          requiredVersion: false,
-          generate: false
-        }
+        "./bootstrap": "./src/bootstrap.js"
       }
     })
   ],
@@ -38,6 +24,7 @@ export default defineConfig({
   },
   build: {
     target: "esnext",
-    modulePreload: false
+    modulePreload: false,
+    cssCodeSplit: false
   }
 });

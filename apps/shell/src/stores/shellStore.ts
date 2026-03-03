@@ -55,7 +55,7 @@ const defaultMenus: MenuItem[] = [
     MfeConfig: {
       RemoteEntry: "https://mfe-cbms.vercel.app/assets/remoteEntry.js",
       Scope: "cbmsApp",
-      Module: "./CbmsApp"
+      Module: "./bootstrap"
     }
   },
   {
@@ -66,7 +66,18 @@ const defaultMenus: MenuItem[] = [
     MfeConfig: {
       RemoteEntry: "https://mfe-cdts.vercel.app/assets/remoteEntry.js",
       Scope: "cdtsApp",
-      Module: "./CdtsApp"
+      Module: "./bootstrap"
+    }
+  },
+  {
+    Id: "3",
+    Title: "Products",
+    Url: "/products",
+    Sequence: 3,
+    MfeConfig: {
+      RemoteEntry: "https://mfe-products-angular.vercel.app/assets/remoteEntry.js",
+      Scope: "productsAngular",
+      Module: "./bootstrap"
     }
   }
 ];

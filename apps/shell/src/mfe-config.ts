@@ -12,13 +12,20 @@ export const mfeConfig: MfeDefinition[] = [
     route: "/cbms",
     remoteEntry: "https://mfe-cbms.vercel.app/assets/remoteEntry.js",
     scope: "cbmsApp",
-    exposedModule: "./CbmsApp"
+    exposedModule: "./bootstrap"
   },
   {
     name: "tasks",
     route: "/tasks",
     remoteEntry: "https://mfe-cdts.vercel.app/assets/remoteEntry.js",
     scope: "cdtsApp",
-    exposedModule: "./CdtsApp"
+    exposedModule: "./bootstrap"
+  },
+  {
+    name: "products",
+    route: "/products",
+    remoteEntry: "https://mfe-products-angular.vercel.app/assets/remoteEntry.js",
+    scope: "productsAngular",
+    exposedModule: "./bootstrap"
   }
 ];

@@ -12,7 +12,20 @@ export default defineConfig({
       exposes: {
         "./CbmsApp": "./src/CbmsApp.tsx"
       },
-      shared: ["react", "react-dom"]
+      shared: {
+        react: {
+          singleton: true,
+          import: false,
+          requiredVersion: false,
+          generate: false
+        },
+        "react-dom": {
+          singleton: true,
+          import: false,
+          requiredVersion: false,
+          generate: false
+        }
+      }
     })
   ],
   server: {
@@ -24,6 +37,7 @@ export default defineConfig({
     cors: true
   },
   build: {
-    target: "esnext"
+    target: "esnext",
+    modulePreload: false
   }
 });

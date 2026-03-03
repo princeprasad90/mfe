@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { loadRemoteVite } from "./mfe/loadRemoteVite";
 
 type Props = {
@@ -6,6 +7,7 @@ type Props = {
   remoteEntry: string;
   scope: string;
   exposedModule: string;
+  basePath: string;
 };
 
 type BootstrapModule = {
@@ -13,9 +15,11 @@ type BootstrapModule = {
   unmount?: () => void | Promise<void>;
 };
 
-export default function RemoteComponent({ name, remoteEntry, scope, exposedModule }: Props) {
+export default function RemoteComponent({ name, remoteEntry, scope, exposedModule, basePath }: Props) {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const location = useLocation();
+  const routePath = `${location.pathname}${location.search}`;
 
   useEffect(() => {
     let remoteUnmount: BootstrapModule["unmount"] | undefined;
@@ -28,7 +32,10 @@ export default function RemoteComponent({ name, remoteEntry, scope, exposedModul
         }
 
         const remoteModule = await loadRemoteVite<BootstrapModule>(remoteEntry, exposedModule);
-        await remoteModule.mount(hostRef.current);
+        await remoteModule.mount(hostRef.current, {
+          routePath,
+          basePath
+        });
         remoteUnmount = remoteModule.unmount;
       } catch (loadError) {
         console.error("[shell] Remote component failed", { name, scope, remoteEntry, exposedModule, loadError });
@@ -41,7 +48,7 @@ export default function RemoteComponent({ name, remoteEntry, scope, exposedModul
     return () => {
       void remoteUnmount?.();
     };
-  }, [name, scope, remoteEntry, exposedModule]);
+  }, [name, scope, remoteEntry, exposedModule, routePath, basePath]);
 
   if (error) {
     return <div>{error}</div>;

@@ -3,24 +3,50 @@ type FederatedContainer = {
   init?: (shareScope: unknown) => Promise<void> | void;
 };
 
-const containers = new Map<string, FederatedContainer>();
+const containerCache = new Map<string, Promise<FederatedContainer>>();
+
+const toContainer = (remoteNamespace: unknown, remoteEntry: string): FederatedContainer => {
+  const maybeContainer = remoteNamespace as Partial<FederatedContainer> & {
+    default?: Partial<FederatedContainer>;
+  };
+
+  const container = (maybeContainer?.get ? maybeContainer : maybeContainer?.default) as Partial<FederatedContainer> | undefined;
+  if (!container?.get) {
+    throw new Error(
+      `Hybrid runtime detected for ${remoteEntry}. Expected a Vite federation container exposing get().`
+    );
+  }
+
+  return container as FederatedContainer;
+};
 
 const getContainer = async (remoteEntry: string): Promise<FederatedContainer> => {
-  if (containers.has(remoteEntry)) {
-    return containers.get(remoteEntry)!;
+  if (!remoteEntry.includes("/assets/remoteEntry.js")) {
+    throw new Error(
+      `Invalid remoteEntry for ${remoteEntry}. All MFEs must publish /assets/remoteEntry.js from Vite federation builds.`
+    );
   }
 
-  const container = (await import(/* webpackIgnore: true */ remoteEntry)) as FederatedContainer;
-  if (!container?.get) {
-    throw new Error(`Remote entry at ${remoteEntry} does not expose get()`);
+  if (!containerCache.has(remoteEntry)) {
+    containerCache.set(
+      remoteEntry,
+      (async () => {
+        const remoteNamespace = await import(/* @vite-ignore */ remoteEntry);
+        const container = toContainer(remoteNamespace, remoteEntry);
+        try {
+          await container.init?.({});
+        } catch (error) {
+          const message = error instanceof Error ? error.message : String(error);
+          if (!message.includes("already initialized")) {
+            throw error;
+          }
+        }
+        return container;
+      })()
+    );
   }
 
-  if (container.init) {
-    await container.init({});
-  }
-
-  containers.set(remoteEntry, container);
-  return container;
+  return containerCache.get(remoteEntry)!;
 };
 
 export const loadRemoteVite = async <TModule = any>(remoteEntry: string, module: string): Promise<TModule> => {

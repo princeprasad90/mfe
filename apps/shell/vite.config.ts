@@ -3,25 +3,19 @@ import react from "@vitejs/plugin-react";
 import federation from "@originjs/vite-plugin-federation";
 
 export default defineConfig({
-  base: "./",
   plugins: [
     react(),
     federation({
-      name: "cdtsApp",
-      filename: "remoteEntry.js",
-      exposes: {
-        "./bootstrap": "./src/bootstrap.ts"
-      },
-      shared: ["react", "react-dom"]
+      name: "shell",
+      shared: ["react", "react-dom", "react-router-dom"]
     })
   ],
   server: {
     host: "0.0.0.0",
-    port: 3002,
-    cors: true
+    port: 3000
   },
   preview: {
-    cors: true
+    port: 3000
   },
   build: {
     target: "esnext",

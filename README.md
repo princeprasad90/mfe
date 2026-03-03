@@ -1,12 +1,16 @@
 # mfe
 
-Minimal micro-frontend setup with a webpack shell and two Vite remotes using Module Federation.
+Vite-only micro-frontend monorepo using `@originjs/vite-plugin-federation` across shell and all remotes.
+
+Full repository documentation (architecture, runtime flow, app details, file inventory):
+- `DOCUMENTATION.md`
 
 ## Structure
 
-- `apps/shell` - webpack shell that composes MFEs
-- `apps/cbms` - Vite remote for CBMS profile maker/checker
-- `apps/cdts` - Vite remote for CDTS profile maker/checker
+- `apps/shell` - Vite host shell (React + React Router)
+- `apps/cbms` - Vite remote (React)
+- `apps/cdts` - Vite remote (React)
+- `apps/mfe-products-angular` - Vite remote (Angular runtime)
 - `packages/notification-sdk` - shared notification SDK
 
 ## Getting Started
@@ -15,20 +19,41 @@ Minimal micro-frontend setup with a webpack shell and two Vite remotes using Mod
 npm install
 ```
 
-### Run the MFEs
-
-In separate terminals:
+Run in separate terminals:
 
 ```bash
 npm run dev:cbms
 npm run dev:cdts
+npm run dev:products-angular
 npm run dev:shell
 ```
 
-Then open `http://localhost:3000`.
+Open:
+- `http://localhost:3000`
 
-## Remote deployment notes
+## Federation Runtime
 
-- Build each Vite remote before deploying (`npm run build -w apps/cbms` and `npm run build -w apps/cdts`).
-- Deploy the generated `dist` output so the shell can fetch built federation assets.
-- Configure shell menu entries to use `/assets/remoteEntry.js` for Vite remotes.
+All MFEs expose `./bootstrap` and publish `remoteEntry.js` through Vite federation.
+
+Default local remote entries used by shell:
+- `http://localhost:3001/assets/remoteEntry.js` (cbms)
+- `http://localhost:3002/assets/remoteEntry.js` (cdts)
+- `http://localhost:3003/assets/remoteEntry.js` (products)
+
+Override with shell env vars when needed:
+- `VITE_CBMS_REMOTE_ENTRY`
+- `VITE_CDTS_REMOTE_ENTRY`
+- `VITE_PRODUCTS_REMOTE_ENTRY`
+
+Committed environment files:
+- `apps/shell/.env.development` (localhost remotes)
+- `apps/shell/.env.production` (Vercel remotes)
+
+## Build
+
+```bash
+npm run build -w apps/shell
+npm run build -w apps/cbms
+npm run build -w apps/cdts
+npm run build -w apps/mfe-products-angular
+```

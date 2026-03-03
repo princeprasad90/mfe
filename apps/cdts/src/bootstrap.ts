@@ -2,9 +2,14 @@ import React from "react";
 import ReactDOM from "react-dom/client";
 import CdtsApp from "./CdtsApp";
 
-let root = null;
+type MountProps = {
+  routePath?: string;
+  basePath?: string;
+};
 
-export function mount(container, props = {}) {
+let root: ReactDOM.Root | null = null;
+
+export function mount(container: HTMLElement, props: MountProps = {}) {
   root = ReactDOM.createRoot(container);
   root.render(React.createElement(CdtsApp, props));
 }

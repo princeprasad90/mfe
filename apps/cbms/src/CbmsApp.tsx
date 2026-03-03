@@ -16,7 +16,10 @@ const payments: Payment[] = Array.from({ length: 23 }, (_, index) => ({
   status: index % 2 === 0 ? "Pending" : "Approved"
 }));
 
-const CbmsApp = ({ routePath = "/payments", basePath = "/payments" }: Props) => {
+const CbmsApp = ({
+  routePath = `${window.location.pathname}${window.location.search}`,
+  basePath = "/cbms"
+}: Props) => {
   const detailMatch = routePath.match(/\/details\/(\d+)/);
   const detailId = detailMatch ? Number(detailMatch[1]) : null;
   const detailItem = payments.find((item) => item.id === detailId);
@@ -31,7 +34,8 @@ const CbmsApp = ({ routePath = "/payments", basePath = "/payments" }: Props) => 
   }, [currentPage]);
 
   const goTo = (path: string) => {
-    window.location.hash = `#${path}`;
+    window.history.pushState({}, "", path);
+    window.dispatchEvent(new PopStateEvent("popstate"));
   };
 
   if (detailItem) {

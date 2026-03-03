@@ -1,26 +1,24 @@
 import { defineConfig } from "vite";
-import react from "@vitejs/plugin-react";
 import federation from "@originjs/vite-plugin-federation";
 
 export default defineConfig({
   base: "./",
   plugins: [
-    react(),
     federation({
-      name: "cdtsApp",
+      name: "productsAngular",
       filename: "remoteEntry.js",
       exposes: {
         "./bootstrap": "./src/bootstrap.ts"
-      },
-      shared: ["react", "react-dom"]
+      }
     })
   ],
   server: {
     host: "0.0.0.0",
-    port: 3002,
+    port: 3003,
     cors: true
   },
   preview: {
+    port: 4173,
     cors: true
   },
   build: {

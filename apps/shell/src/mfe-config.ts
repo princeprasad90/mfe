@@ -6,27 +6,31 @@ export type MfeDefinition = {
   exposedModule: string;
 };
 
-const PRODUCTS_ANGULAR_APP_URL = "https://mfe-products-angular.vercel.app";
+const defaultRemoteEntries = {
+  cbms: "http://localhost:3001/assets/remoteEntry.js",
+  cdts: "http://localhost:3002/assets/remoteEntry.js",
+  products: "http://localhost:3003/assets/remoteEntry.js"
+};
 
 export const mfeConfig: MfeDefinition[] = [
   {
     name: "cbms",
     route: "/cbms",
-    remoteEntry: "https://mfe-cbms.vercel.app/assets/remoteEntry.js",
+    remoteEntry: import.meta.env.VITE_CBMS_REMOTE_ENTRY ?? defaultRemoteEntries.cbms,
     scope: "cbmsApp",
     exposedModule: "./bootstrap"
   },
   {
     name: "tasks",
     route: "/tasks",
-    remoteEntry: "https://mfe-cdts.vercel.app/assets/remoteEntry.js",
+    remoteEntry: import.meta.env.VITE_CDTS_REMOTE_ENTRY ?? defaultRemoteEntries.cdts,
     scope: "cdtsApp",
     exposedModule: "./bootstrap"
   },
   {
     name: "products",
     route: "/products",
-    remoteEntry: `${PRODUCTS_ANGULAR_APP_URL}/assets/remoteEntry.js`,
+    remoteEntry: import.meta.env.VITE_PRODUCTS_REMOTE_ENTRY ?? defaultRemoteEntries.products,
     scope: "productsAngular",
     exposedModule: "./bootstrap"
   }

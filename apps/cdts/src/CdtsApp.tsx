@@ -16,7 +16,10 @@ const tasks: Task[] = Array.from({ length: 18 }, (_, index) => ({
   priority: index % 3 === 0 ? "High" : "Normal"
 }));
 
-const CdtsApp = ({ routePath = "/tasks", basePath = "/tasks" }: Props) => {
+const CdtsApp = ({
+  routePath = `${window.location.pathname}${window.location.search}`,
+  basePath = "/tasks"
+}: Props) => {
   const detailMatch = routePath.match(/\/details\/(\d+)/);
   const detailId = detailMatch ? Number(detailMatch[1]) : null;
   const detailTask = tasks.find((item) => item.id === detailId);
@@ -31,7 +34,8 @@ const CdtsApp = ({ routePath = "/tasks", basePath = "/tasks" }: Props) => {
   }, [currentPage]);
 
   const goTo = (path: string) => {
-    window.location.hash = `#${path}`;
+    window.history.pushState({}, "", path);
+    window.dispatchEvent(new PopStateEvent("popstate"));
   };
 
   if (detailTask) {

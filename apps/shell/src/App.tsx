@@ -20,8 +20,16 @@ export default function App() {
             {mfeConfig.map((mfe) => (
               <Route
                 key={mfe.name}
-                path={mfe.route}
-                element={<RemoteComponent name={mfe.name} remoteEntry={mfe.remoteEntry} scope={mfe.scope} exposedModule={mfe.exposedModule} />}
+                path={`${mfe.route}/*`}
+                element={
+                  <RemoteComponent
+                    name={mfe.name}
+                    remoteEntry={mfe.remoteEntry}
+                    scope={mfe.scope}
+                    exposedModule={mfe.exposedModule}
+                    basePath={mfe.route}
+                  />
+                }
               />
             ))}
             <Route path="*" element={<Navigate to={mfeConfig[0].route} replace />} />

@@ -10,8 +10,9 @@ export default defineConfig({
       name: "cbmsApp",
       filename: "remoteEntry.js",
       exposes: {
-        "./bootstrap": "./src/bootstrap.js"
-      }
+        "./bootstrap": "./src/bootstrap.ts"
+      },
+      shared: ["react", "react-dom"]
     })
   ],
   server: {

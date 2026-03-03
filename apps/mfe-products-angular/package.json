@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "vite",
-    "build": "vite build",
-    "preview": "vite preview"
+    "dev": "ng serve",
+    "build": "ng build",
+    "preview": "npx http-server ./dist/mfe-products-angular/browser -p 4173"
   },
   "dependencies": {
     "@angular/animations": "^17.3.0",
@@ -21,11 +21,11 @@
     "zone.js": "~0.14.3"
   },
   "devDependencies": {
-    "@analogjs/vite-plugin-angular": "^2.3.1",
+    "@angular-builders/custom-webpack": "^17.0.2",
+    "@angular-devkit/build-angular": "^17.3.17",
+    "@angular/cli": "^17.3.17",
     "@angular/compiler-cli": "^17.3.0",
-    "@originjs/vite-plugin-federation": "^1.4.1",
     "typescript": "~5.4.2",
-    "vite": "^6.4.1"
-  },
-  "type": "module"
+    "webpack": "^5.94.0"
+  }
 }

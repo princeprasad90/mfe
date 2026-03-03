@@ -1,0 +1,9 @@
+<section class="products">
+  <h2>Products</h2>
+  <ul>
+    <li *ngFor="let product of products" (click)="openDetails(product.id)">
+      <h3>{{ product.name }}</h3>
+      <p>{{ product.description }}</p>
+    </li>
+  </ul>
+</section>

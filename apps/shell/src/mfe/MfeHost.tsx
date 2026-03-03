@@ -1,15 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
-import { createRoot, Root } from "react-dom/client";
 import { loadRemoteVite } from "./loadRemoteVite";
 import { useShellStore } from "../stores/shellStore";
 
 type Props = { path: string };
 
+type BootstrapModule = {
+  mount: (container: HTMLElement, props?: Record<string, unknown>) => void | Promise<void>;
+  unmount?: () => void | Promise<void>;
+};
+
 const normalizePath = (value: string) => value.split("?")[0].replace(/\/$/, "") || "/";
 
 const MfeHost = ({ path }: Props) => {
   const hostRef = useRef<HTMLDivElement | null>(null);
-  const rootRef = useRef<Root | null>(null);
+  const unmountRef = useRef<BootstrapModule["unmount"] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const menus = useShellStore((state) => state.menus);
   const manifest = useShellStore((state) => state.mfeManifest);
@@ -21,45 +25,42 @@ const MfeHost = ({ path }: Props) => {
         const menuPath = normalizePath(item.Url);
         return normalizedPath === menuPath || normalizedPath.startsWith(`${menuPath}/`);
       });
+
       if (!menu || !hostRef.current) {
-        const message = "No micro frontend found for this path.";
-        console.error("[shell] MFE route did not match any menu", { path, menus });
-        setError(message);
+        setError("No micro frontend found for this path.");
         return;
       }
 
       const config = manifest[menu.MfeConfig.Scope];
       if (!config) {
-        const message = "MFE configuration missing in manifest.";
-        console.error("[shell] MFE manifest configuration missing", { path, menu, manifest });
-        setError(message);
+        setError("MFE configuration missing in manifest.");
         return;
       }
 
       try {
-        console.info("[shell] Rendering micro frontend", { path, menu, config });
         setError(null);
-        const remoteModule = await loadRemoteVite<any>(config.RemoteEntry, config.Scope, config.Module);
-        const RemoteComponent = remoteModule.default || remoteModule;
+        await unmountRef.current?.();
+        unmountRef.current = null;
+
+        const remoteModule = await loadRemoteVite<BootstrapModule>(config.RemoteEntry, config.Module);
 
         hostRef.current.innerHTML = "";
         const mountNode = document.createElement("div");
         hostRef.current.appendChild(mountNode);
 
-        rootRef.current?.unmount();
-        rootRef.current = createRoot(mountNode);
-        rootRef.current.render(<RemoteComponent routePath={path} basePath={menu.Url} />);
+        await remoteModule.mount(mountNode, { routePath: path, basePath: menu.Url });
+        unmountRef.current = remoteModule.unmount ?? null;
       } catch (err) {
-        const error = err as Error;
-        console.error("[shell] Failed to render micro frontend", { path, menu, config, error });
-        setError(`Unable to load micro frontend: ${error.message}. Check browser console for details.`);
+        const loadError = err as Error;
+        setError(`Unable to load micro frontend: ${loadError.message}`);
       }
     };
 
     renderMfe();
+
     return () => {
-      rootRef.current?.unmount();
-      rootRef.current = null;
+      void unmountRef.current?.();
+      unmountRef.current = null;
     };
   }, [path, menus, manifest]);
 
@@ -67,7 +68,7 @@ const MfeHost = ({ path }: Props) => {
     return <p>{error}</p>;
   }
 
-  return <div ref={hostRef} />;
+  return <div id="mfe-root" ref={hostRef} />;
 };
 
 export default MfeHost;

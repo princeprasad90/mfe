@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { loadRemoteVite } from "./mfe/loadRemoteVite";
 
 type Props = {
@@ -8,40 +8,38 @@ type Props = {
   exposedModule: string;
 };
 
-const resolveRemoteModule = async (remoteEntry: string, scope: string, exposedModule: string) => {
-  const module = await loadRemoteVite(remoteEntry, scope, exposedModule);
-  return module.default || module;
+type BootstrapModule = {
+  mount: (container: HTMLElement, props?: Record<string, unknown>) => void | Promise<void>;
+  unmount?: () => void | Promise<void>;
 };
 
 export default function RemoteComponent({ name, remoteEntry, scope, exposedModule }: Props) {
-  const [Component, setComponent] = useState<React.ComponentType | null>(null);
+  const hostRef = useRef<HTMLDivElement | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    let mounted = true;
+    let remoteUnmount: BootstrapModule["unmount"] | undefined;
 
     const load = async () => {
       try {
-        console.info("[shell] Loading remote component", { name, scope, remoteEntry, exposedModule });
         setError(null);
-        const remoteModule = await resolveRemoteModule(remoteEntry, scope, exposedModule);
-
-        if (mounted) {
-          console.info("[shell] Remote component resolved", { name, scope, exposedModule });
-          setComponent(() => remoteModule);
+        if (!hostRef.current) {
+          return;
         }
+
+        const remoteModule = await loadRemoteVite<BootstrapModule>(remoteEntry, exposedModule);
+        await remoteModule.mount(hostRef.current);
+        remoteUnmount = remoteModule.unmount;
       } catch (loadError) {
         console.error("[shell] Remote component failed", { name, scope, remoteEntry, exposedModule, loadError });
-        if (mounted) {
-          setError(`Unable to load ${name}. Check console logs for details.`);
-        }
+        setError(`Unable to load ${name}. Check console logs for details.`);
       }
     };
 
     load();
 
     return () => {
-      mounted = false;
+      void remoteUnmount?.();
     };
   }, [name, scope, remoteEntry, exposedModule]);
 
@@ -49,9 +47,5 @@ export default function RemoteComponent({ name, remoteEntry, scope, exposedModul
     return <div>{error}</div>;
   }
 
-  if (!Component) {
-    return <div>Loading MFE...</div>;
-  }
-
-  return <Component />;
+  return <div id="mfe-root" ref={hostRef}>Loading MFE...</div>;
 }

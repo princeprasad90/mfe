@@ -10,21 +10,7 @@ export default defineConfig({
       name: "cbmsApp",
       filename: "remoteEntry.js",
       exposes: {
-        "./CbmsApp": "./src/CbmsApp.tsx"
-      },
-      shared: {
-        react: {
-          singleton: true,
-          import: false,
-          requiredVersion: false,
-          generate: false
-        },
-        "react-dom": {
-          singleton: true,
-          import: false,
-          requiredVersion: false,
-          generate: false
-        }
+        "./bootstrap": "./src/bootstrap.js"
       }
     })
   ],
@@ -38,6 +24,7 @@ export default defineConfig({
   },
   build: {
     target: "esnext",
-    modulePreload: false
+    modulePreload: false,
+    cssCodeSplit: false
   }
 });

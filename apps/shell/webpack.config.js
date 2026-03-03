@@ -36,11 +36,7 @@ module.exports = {
   },
   plugins: [
     new ModuleFederationPlugin({
-      name: "shell",
-      shared: {
-        react: { singleton: true, strictVersion: false, requiredVersion: false },
-        "react-dom": { singleton: true, strictVersion: false, requiredVersion: false }
-      }
+      name: "shell"
     }),
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, "public", "index.html")

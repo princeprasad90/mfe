@@ -1,7 +1,8 @@
-import React from "react";
-import { createRoot } from "react-dom/client";
-import CbmsApp from "./CbmsApp";
 import "./cbms.css";
+import { mount } from "./bootstrap";
 
-const root = createRoot(document.getElementById("root") as HTMLElement);
-root.render(<CbmsApp />);
+const container = document.getElementById("root");
+
+if (container) {
+  mount(container);
+}

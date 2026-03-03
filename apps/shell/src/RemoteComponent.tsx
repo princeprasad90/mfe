@@ -1,47 +1,43 @@
-import React, { useEffect, useRef, useState } from "react";
-import { loadRemoteVite } from "./mfe/loadRemoteVite";
+import { useEffect, useRef, useState } from "react";
+import type { MfeScope } from "./mfe-config";
+import { loadRemoteModule } from "./mfe/loadRemoteModule";
 
 type Props = {
   name: string;
-  remoteEntry: string;
-  scope: string;
-  exposedModule: string;
+  scope: MfeScope;
 };
 
-type BootstrapModule = {
-  mount: (container: HTMLElement, props?: Record<string, unknown>) => void | Promise<void>;
-  unmount?: () => void | Promise<void>;
-};
-
-export default function RemoteComponent({ name, remoteEntry, scope, exposedModule }: Props) {
+export default function RemoteComponent({ name, scope }: Props) {
   const hostRef = useRef<HTMLDivElement | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    let remoteUnmount: BootstrapModule["unmount"] | undefined;
+    let remoteUnmount: (() => void | Promise<void>) | undefined;
 
     const load = async () => {
       try {
         setError(null);
-        if (!hostRef.current) {
+        const container = hostRef.current;
+
+        if (!container) {
           return;
         }
 
-        const remoteModule = await loadRemoteVite<BootstrapModule>(remoteEntry, exposedModule);
-        await remoteModule.mount(hostRef.current);
+        const remoteModule = await loadRemoteModule(scope);
+        await remoteModule.mount(container);
         remoteUnmount = remoteModule.unmount;
       } catch (loadError) {
-        console.error("[shell] Remote component failed", { name, scope, remoteEntry, exposedModule, loadError });
+        console.error("[shell] Remote component failed", { name, scope, loadError });
         setError(`Unable to load ${name}. Check console logs for details.`);
       }
     };
 
-    load();
+    void load();
 
     return () => {
       void remoteUnmount?.();
     };
-  }, [name, scope, remoteEntry, exposedModule]);
+  }, [name, scope]);
 
   if (error) {
     return <div>{error}</div>;

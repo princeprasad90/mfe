@@ -10,5 +10,8 @@
     "dev:cbms": "npm run dev -w apps/cbms",
     "dev:cdts": "npm run dev -w apps/cdts",
     "dev:products-angular": "npm run dev -w apps/mfe-products-angular"
+  },
+  "devDependencies": {
+    "vite": "^6.4.1"
   }
 }

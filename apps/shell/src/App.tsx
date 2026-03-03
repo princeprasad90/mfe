@@ -1,4 +1,3 @@
-import React from "react";
 import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
 import Menu from "./Menu";
 import RemoteComponent from "./RemoteComponent";
@@ -18,11 +17,7 @@ export default function App() {
         <main className="shell__content">
           <Routes>
             {mfeConfig.map((mfe) => (
-              <Route
-                key={mfe.name}
-                path={mfe.route}
-                element={<RemoteComponent name={mfe.name} remoteEntry={mfe.remoteEntry} scope={mfe.scope} exposedModule={mfe.exposedModule} />}
-              />
+              <Route key={mfe.name} path={mfe.route} element={<RemoteComponent name={mfe.name} scope={mfe.scope} />} />
             ))}
             <Route path="*" element={<Navigate to={mfeConfig[0].route} replace />} />
           </Routes>

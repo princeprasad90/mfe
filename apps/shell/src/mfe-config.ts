@@ -6,6 +6,8 @@ export type MfeDefinition = {
   exposedModule: string;
 };
 
+const PRODUCTS_ANGULAR_APP_URL = "https://mfe-products-angular.vercel.app";
+
 export const mfeConfig: MfeDefinition[] = [
   {
     name: "cbms",
@@ -24,7 +26,7 @@ export const mfeConfig: MfeDefinition[] = [
   {
     name: "products",
     route: "/products",
-    remoteEntry: "https://mfe-products-angular.vercel.app/assets/remoteEntry.js",
+    remoteEntry: `${PRODUCTS_ANGULAR_APP_URL}/assets/remoteEntry.js`,
     scope: "productsAngular",
     exposedModule: "./bootstrap"
   }

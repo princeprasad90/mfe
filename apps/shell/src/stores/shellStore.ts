@@ -27,6 +27,7 @@ type ShellState = {
 
 const APP_KEY = "shell_appId";
 const PROFILE_KEY = "shell_profileId";
+const PRODUCTS_ANGULAR_APP_URL = "https://mfe-products-angular.vercel.app";
 const cacheKey = (appId: string, profileId: string) => `menu_${appId}_${profileId}`;
 
 const normalizeRemoteEntry = (remoteEntry: string) => {
@@ -75,7 +76,7 @@ const defaultMenus: MenuItem[] = [
     Url: "/products",
     Sequence: 3,
     MfeConfig: {
-      RemoteEntry: "https://mfe-products-angular.vercel.app/assets/remoteEntry.js",
+      RemoteEntry: `${PRODUCTS_ANGULAR_APP_URL}/assets/remoteEntry.js`,
       Scope: "productsAngular",
       Module: "./bootstrap"
     }

@@ -38,8 +38,8 @@ module.exports = {
     new ModuleFederationPlugin({
       name: "shell",
       shared: {
-        react: { singleton: true, requiredVersion: "18.2.0" },
-        "react-dom": { singleton: true, requiredVersion: "18.2.0" }
+        react: { singleton: true, strictVersion: false, requiredVersion: false },
+        "react-dom": { singleton: true, strictVersion: false, requiredVersion: false }
       }
     }),
     new HtmlWebpackPlugin({

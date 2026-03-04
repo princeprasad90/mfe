@@ -48,6 +48,6 @@ jobs:
         with:
           server: 103.38.50.181
           username: ziffariwebapi
-          password: ${{secrets.FTPAPIPASSWORD}}
+          password: ${{secrets.FTPPASSWORD}}
           local-dir: ${{ matrix.app.workspace }}/dist/
           

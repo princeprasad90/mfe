@@ -17,15 +17,15 @@ jobs:
           - name: shell
             workspace: apps/shell
             server-dir: /public_html/shell/
-          - name: cbms
-            workspace: apps/cbms
-            server-dir: /public_html/cbms/
-          - name: cdts
-            workspace: apps/cdts
-            server-dir: /public_html/cdts/
-          - name: mfe-products-angular
-            workspace: apps/mfe-products-angular
-            server-dir: /public_html/mfe-products-angular/
+          #- name: cbms
+          #  workspace: apps/cbms
+          #  server-dir: /public_html/cbms/
+          #- name: cdts
+          #  workspace: apps/cdts
+          #  server-dir: /public_html/cdts/
+          #- name: mfe-products-angular
+          #  workspace: apps/mfe-products-angular
+          #  server-dir: /public_html/mfe-products-angular/
 
     steps:
       - name: Checkout repository
@@ -47,7 +47,7 @@ jobs:
         uses: SamKirkland/FTP-Deploy-Action@4.0.0
         with:
           server: 103.38.50.181
-          username: ziffariwebapi
+          username: mfeftpuser
           password: ${{secrets.FTPPASSWORD}}
           local-dir: ${{ matrix.app.workspace }}/dist/
           

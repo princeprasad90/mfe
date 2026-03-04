@@ -1,77 +1,70 @@
 import type { User, Application, Profile, MenuItem } from "./types";
 
 const BFF_URL = import.meta.env.VITE_BFF_URL || "http://localhost:5001";
-const AUTH_LOGIN_URL =
-  import.meta.env.VITE_AUTH_LOGIN_URL || `${BFF_URL}/auth/login`;
 
-// Helper for fetch with credentials
-const fetchWithAuth = async <T>(
-  url: string,
-  options?: RequestInit,
+// Custom API Error with status code
+export class ApiError extends Error {
+  constructor(
+    public status: number,
+    message: string,
+  ) {
+    super(message);
+    this.name = "ApiError";
+  }
+
+  get isUnauthorized() {
+    return this.status === 401;
+  }
+  get isNotFound() {
+    return this.status === 404;
+  }
+}
+
+// Core fetch wrapper
+const api = async <T>(
+  endpoint: string,
+  options: RequestInit = {},
 ): Promise<T> => {
-  const response = await fetch(`${BFF_URL}${url}`, {
+  const response = await fetch(`${BFF_URL}${endpoint}`, {
     ...options,
     credentials: "include",
     headers: {
       "Content-Type": "application/json",
-      ...options?.headers,
+      ...options.headers,
     },
   });
 
   if (response.status === 401) {
-    // Redirect to login with current URL as return
     const returnUrl = encodeURIComponent(window.location.href);
-    window.location.href = `${AUTH_LOGIN_URL}?returnUrl=${returnUrl}`;
-    throw new Error("Unauthorized");
+    window.location.href = `${BFF_URL}/auth/login?returnUrl=${returnUrl}`;
+    throw new ApiError(401, "Unauthorized");
   }
 
   if (!response.ok) {
-    throw new Error(`API Error: ${response.status} ${response.statusText}`);
+    throw new ApiError(
+      response.status,
+      `${response.status} ${response.statusText}`,
+    );
   }
 
-  return response.json();
+  // Handle empty responses
+  const text = await response.text();
+  return text ? JSON.parse(text) : ({} as T);
 };
 
-// Auth APIs
+// Auth API
 export const authApi = {
-  getMe: async (): Promise<User> => {
-    return fetchWithAuth<User>("/auth/me");
-  },
-
-  logout: async (): Promise<void> => {
-    await fetchWithAuth("/auth/logout", { method: "POST" });
-  },
-
-  getLoginUrl: (returnUrl?: string): string => {
-    const url = returnUrl || window.location.href;
-    return `${AUTH_LOGIN_URL}?returnUrl=${encodeURIComponent(url)}`;
-  },
+  me: () => api<User>("/auth/me"),
+  logout: () => api<void>("/auth/logout", { method: "POST" }),
+  loginUrl: (returnUrl = window.location.href) =>
+    `${BFF_URL}/auth/login?returnUrl=${encodeURIComponent(returnUrl)}`,
 };
 
-// Shell APIs
+// Shell API
 export const shellApi = {
-  getApplications: async (): Promise<Application[]> => {
-    return fetchWithAuth<Application[]>("/shell/apps");
-  },
-
-  getProfiles: async (appId: string): Promise<Profile[]> => {
-    return fetchWithAuth<Profile[]>(`/shell/apps/${appId}/profiles`);
-  },
-
-  getMenus: async (appId: string, profileId: string): Promise<MenuItem[]> => {
-    return fetchWithAuth<MenuItem[]>(
-      `/shell/apps/${appId}/profiles/${profileId}/menus`,
-    );
-  },
-
-  resolveMfe: async (config: {
-    RemoteEntry: string;
-    Scope: string;
-    ExposedModule: string;
-  }) => {
-    return fetchWithAuth("/shell/mfes/resolve", {
-      method: "POST",
-      body: JSON.stringify(config),
-    });
-  },
+  getApplications: () => api<Application[]>("/shell/apps"),
+  getProfiles: (appId: string) =>
+    api<Profile[]>(`/shell/apps/${appId}/profiles`),
+  getMenus: (appId: string, profileId: string) =>
+    api<MenuItem[]>(`/shell/apps/${appId}/profiles/${profileId}/menus`),
 };

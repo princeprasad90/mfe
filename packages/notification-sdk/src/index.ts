@@ -4,6 +4,41 @@ type NotifyPayload = {
   title: string;
   message: string;
   variant?: "info" | "success" | "warning" | "error";
+  duration?: number;
+};
+
+// Event names for cross-MFE communication
+export const SHELL_EVENTS = {
+  NOTIFICATION: "mfe:notification",
+  LOADING_START: "mfe:loading:start",
+  LOADING_STOP: "mfe:loading:stop",
+} as const;
+
+// Shell-integrated notification (preferred)
+export const shellNotify = ({
+  title,
+  message,
+  variant = "info",
+  duration = 4000,
+}: NotifyPayload) => {
+  window.dispatchEvent(
+    new CustomEvent(SHELL_EVENTS.NOTIFICATION, {
+      detail: { type: variant, title, message, duration },
+    }),
+  );
+};
+
+// Shell-integrated loading controls
+export const showLoader = (key: string = "default") => {
+  window.dispatchEvent(
+    new CustomEvent(SHELL_EVENTS.LOADING_START, { detail: { key } }),
+  );
+};
+
+export const hideLoader = (key: string = "default") => {
+  window.dispatchEvent(
+    new CustomEvent(SHELL_EVENTS.LOADING_STOP, { detail: { key } }),
+  );
 };
 
 const ensureContainer = () => {
@@ -31,7 +66,7 @@ export const notify = ({ title, message, variant = "info" }: NotifyPayload) => {
     info: "#2563eb",
     success: "#16a34a",
     warning: "#f97316",
-    error: "#dc2626"
+    error: "#dc2626",
   };
 
   toast.style.minWidth = "220px";

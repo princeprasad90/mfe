@@ -1,8 +1,8 @@
 // API Types
 export type User = {
-  DisplayName: string;
-  WindowsId: string;
+  UserId: string;
   Email: string;
+  DisplayName: string;
 };
 
 export type Application = {

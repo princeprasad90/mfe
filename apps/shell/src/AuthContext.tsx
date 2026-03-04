@@ -33,7 +33,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setState((prev) => ({ ...prev, isLoading: true }));
 
     try {
-      const user = await authApi.getMe();
+      const user = await authApi.me();
       setState({
         isAuthenticated: true,
         isLoading: false,
@@ -49,7 +49,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, []);
 
   const login = useCallback(() => {
-    window.location.href = authApi.getLoginUrl();
+    window.location.href = authApi.loginUrl();
   }, []);
 
   const logout = useCallback(async () => {

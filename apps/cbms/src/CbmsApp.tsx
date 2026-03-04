@@ -8,6 +8,19 @@ type Props = {
 
 type Payment = { id: number; customer: string; amount: number; status: string };
 
+// Shell event helpers (inline for demo, could use notification-sdk package)
+const shellNotify = (type: 'success' | 'error' | 'warning' | 'info', title: string, message: string) => {
+  window.dispatchEvent(new CustomEvent('mfe:notification', { detail: { type, title, message, duration: 4000 } }));
+};
+
+const showLoader = (key: string = 'cbms') => {
+  window.dispatchEvent(new CustomEvent('mfe:loading:start', { detail: { key } }));
+};
+
+const hideLoader = (key: string = 'cbms') => {
+  window.dispatchEvent(new CustomEvent('mfe:loading:stop', { detail: { key } }));
+};
+
 const PAGE_SIZE = 5;
 const payments: Payment[] = Array.from({ length: 23 }, (_, index) => ({
   id: index + 1,
@@ -76,6 +89,32 @@ const CbmsApp = ({
         <button className="mfe__ghost" disabled={currentPage <= 1} onClick={() => goTo(`${basePath}?page=${currentPage - 1}`)}>Previous</button>
         <span>Page {currentPage} of {totalPages}</span>
         <button className="mfe__ghost" disabled={currentPage >= totalPages} onClick={() => goTo(`${basePath}?page=${currentPage + 1}`)}>Next</button>
+      </div>
+
+      {/* Demo: Shell Integration Features */}
+      <div className="mfe__demo-section">
+        <h3>Shell Integration Demo</h3>
+        <div className="mfe__demo-row">
+          <span className="mfe__demo-label">Notifications:</span>
+          <button className="mfe__button mfe__button--success" onClick={() => shellNotify('success', 'Success!', 'Payment processed successfully.')}>
+            Success
+          </button>
+          <button className="mfe__button mfe__button--error" onClick={() => shellNotify('error', 'Error', 'Payment failed. Please try again.')}>
+            Error
+          </button>
+          <button className="mfe__button mfe__button--warning" onClick={() => shellNotify('warning', 'Warning', 'Session will expire in 5 minutes.')}>
+            Warning
+          </button>
+          <button className="mfe__button mfe__button--info" onClick={() => shellNotify('info', 'Info', 'New features are available.')}>
+            Info
+          </button>
+        </div>
+        <div className="mfe__demo-row">
+          <span className="mfe__demo-label">Loading:</span>
+          <button className="mfe__button" onClick={() => { showLoader(); setTimeout(hideLoader, 2000); }}>
+            Show Loader (2s)
+          </button>
+        </div>
       </div>
     </div>
   );

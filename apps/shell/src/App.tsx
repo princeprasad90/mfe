@@ -4,6 +4,7 @@ import { AuthProvider, useAuth } from "./AuthContext";
 import { ShellProvider, useShell } from "./ShellContext";
 import Sidebar from "./Sidebar";
 import ContentArea from "./ContentArea";
+import { NotificationContainer, GlobalLoader } from "./components";
 import "./styles.css";
 
 function AuthenticatedApp() {
@@ -76,6 +77,8 @@ function AuthenticatedApp() {
           <ContentArea />
         </main>
       </div>
+      <NotificationContainer />
+      <GlobalLoader />
     </div>
   );
 }

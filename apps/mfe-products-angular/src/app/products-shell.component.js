@@ -1,14 +1,28 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, ChangeDetectorRef } from "@angular/core";
 import { RUNTIME_PROPS } from "./runtime-props.js";
 import ProductsListComponent from "./pages/list/products-list.component.js";
 import ProductDetailsComponent from "./pages/details/product-details.component.js";
 
 class ProductsShellComponent {
   runtimeProps = inject(RUNTIME_PROPS, { optional: true }) ?? {};
-  routePath = this.runtimeProps.routePath ?? `${window.location.pathname}${window.location.search}`;
+  cdr = inject(ChangeDetectorRef);
+  currentPath = window.location.pathname;
+  
+  _popstateHandler = () => {
+    this.currentPath = window.location.pathname;
+    this.cdr.detectChanges();
+  };
+
+  ngOnInit() {
+    window.addEventListener("popstate", this._popstateHandler);
+  }
+
+  ngOnDestroy() {
+    window.removeEventListener("popstate", this._popstateHandler);
+  }
 
   get isDetailsRoute() {
-    return /\/details\/\d+/.test(this.routePath);
+    return /\/details\/\d+/.test(this.currentPath);
   }
 }
 
@@ -17,12 +31,11 @@ Component({
   standalone: true,
   imports: [ProductsListComponent, ProductDetailsComponent],
   template: `
-    <div [style.display]="isDetailsRoute ? 'none' : 'block'">
-      <products-list-page></products-list-page>
-    </div>
-    <div [style.display]="isDetailsRoute ? 'block' : 'none'">
+    @if (isDetailsRoute) {
       <product-details-page></product-details-page>
-    </div>
+    } @else {
+      <products-list-page></products-list-page>
+    }
   `
 })(ProductsShellComponent);
 

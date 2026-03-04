@@ -1,0 +1,32 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.2.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "backend", "backend", "{1AE8ACA6-933B-BF2A-3671-3E2EAC007D16}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "shell-bff", "shell-bff", "{5528A00D-1817-78BF-7193-BC8FC5FADAD4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ShellBff", "backend\shell-bff\ShellBff.csproj", "{A2AD42A0-0032-7649-DF40-9C3E10DB4791}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{A2AD42A0-0032-7649-DF40-9C3E10DB4791}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2AD42A0-0032-7649-DF40-9C3E10DB4791}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A2AD42A0-0032-7649-DF40-9C3E10DB4791}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2AD42A0-0032-7649-DF40-9C3E10DB4791}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{5528A00D-1817-78BF-7193-BC8FC5FADAD4} = {1AE8ACA6-933B-BF2A-3671-3E2EAC007D16}
+		{A2AD42A0-0032-7649-DF40-9C3E10DB4791} = {5528A00D-1817-78BF-7193-BC8FC5FADAD4}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {535812B1-8397-4C1B-9A18-B85819B8EE16}
+	EndGlobalSection
+EndGlobal

@@ -1,15 +1,29 @@
-import { Component, inject } from "@angular/core";
+import { Component, inject, ChangeDetectorRef } from "@angular/core";
 import { products } from "../../data/products.js";
 import { RUNTIME_PROPS } from "../../runtime-props.js";
 
 class ProductDetailsComponent {
   runtimeProps = inject(RUNTIME_PROPS, { optional: true }) ?? {};
+  cdr = inject(ChangeDetectorRef);
   products = products;
   basePath = this.runtimeProps.basePath ?? "/products";
-  routePath = this.runtimeProps.routePath ?? `${window.location.pathname}${window.location.search}`;
+  currentPath = window.location.pathname;
+
+  _popstateHandler = () => {
+    this.currentPath = window.location.pathname;
+    this.cdr.detectChanges();
+  };
+
+  ngOnInit() {
+    window.addEventListener("popstate", this._popstateHandler);
+  }
+
+  ngOnDestroy() {
+    window.removeEventListener("popstate", this._popstateHandler);
+  }
 
   get selectedProduct() {
-    const detailMatch = this.routePath.match(/\/details\/(\d+)/);
+    const detailMatch = this.currentPath.match(/\/details\/(\d+)/);
     const detailId = detailMatch ? Number(detailMatch[1]) : null;
     return this.products.find((item) => item.id === detailId) ?? null;
   }

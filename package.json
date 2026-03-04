@@ -6,9 +6,13 @@
     "packages/*"
   ],
   "scripts": {
+    "dev": "npx concurrently \"npm:dev:*\"",
     "dev:shell": "npm run dev -w apps/shell",
     "dev:cbms": "npm run dev -w apps/cbms",
     "dev:cdts": "npm run dev -w apps/cdts",
     "dev:products-angular": "npm run dev -w apps/mfe-products-angular"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
   }
 }

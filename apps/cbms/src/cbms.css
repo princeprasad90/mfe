@@ -1,39 +1,112 @@
-.mfe {
-  background: #fff;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  padding: 16px;
+/* 
+ * CBMS Styles - Write normal CSS!
+ * PostCSS auto-scopes all selectors to [data-mfe="cbms"]
+ * No manual BEM prefixes needed!
+ */
+
+/* CSS Variables */
+:root {
+  --primary: #0891b2;
+  --primary-dark: #0e7490;
+  --bg: #ecfeff;
+  --border: #a5f3fc;
+  --text: #164e63;
 }
 
+/* Container */
+.mfe {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: linear-gradient(135deg, var(--bg) 0%, #ffffff 100%);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.mfe h2 {
+  margin: 0 0 16px;
+  color: var(--primary-dark);
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.mfe p {
+  margin: 8px 0;
+  color: var(--text);
+}
+
+.mfe p strong {
+  color: var(--primary-dark);
+}
+
+/* List */
 .mfe__list {
   list-style: none;
   padding: 0;
   margin: 0;
   display: grid;
-  gap: 8px;
+  gap: 12px;
 }
 
 .mfe__list-item {
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
-  padding: 10px;
+  background: white;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 16px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  transition: transform 0.15s, box-shadow 0.15s;
 }
 
-.mfe__ghost,
+.mfe__list-item:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(8, 145, 178, 0.15);
+}
+
+/* Buttons */
 .mfe__button {
-  border: 1px solid #d1d5db;
-  background: #f9fafb;
+  background: var(--primary);
+  color: white;
+  border: none;
   border-radius: 6px;
-  padding: 6px 10px;
+  padding: 10px 18px;
+  font-size: 14px;
+  font-weight: 500;
   cursor: pointer;
+  transition: background 0.2s;
 }
 
+.mfe__button:hover {
+  background: var(--primary-dark);
+}
+
+.mfe__ghost {
+  background: transparent;
+  color: var(--primary);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 16px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.mfe__ghost:hover {
+  background: var(--bg);
+}
+
+.mfe__ghost:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Pagination */
 .mfe__pager {
-  margin-top: 12px;
+  margin-top: 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  padding: 16px;
+  background: var(--bg);
+  border-radius: 8px;
 }

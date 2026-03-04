@@ -10,6 +10,8 @@ type MountProps = {
 let root: ReactDOM.Root | null = null;
 
 export function mount(container: HTMLElement, props: MountProps = {}) {
+  // Add data-mfe attribute for CSS scoping
+  container.setAttribute("data-mfe", "cdts");
   root = ReactDOM.createRoot(container);
   root.render(React.createElement(CdtsApp, props));
 }

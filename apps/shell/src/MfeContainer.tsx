@@ -65,7 +65,7 @@ function MfeLoader({ config }: { config: MfeConfig }) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const unmountRef = useRef<BootstrapModule["unmount"] | undefined>();
+  const unmountRef = useRef<BootstrapModule["unmount"] | undefined>(undefined);
 
   useEffect(() => {
     let isMounted = true;

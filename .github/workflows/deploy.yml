@@ -45,9 +45,8 @@ jobs:
       - name: Deploy ${{ matrix.app.name }} to FTP
         uses: SamKirkland/FTP-Deploy-Action@v4.3.5
         with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
+          server: 103.38.50.181
+          username: mfeftpuser
+          password: ${{ secrets.FTPPASSWORD }}
           protocol: ftps
           local-dir: ${{ matrix.app.workspace }}/dist/
-          server-dir: ${{ matrix.app.server-dir }}

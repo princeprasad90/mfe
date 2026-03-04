@@ -43,11 +43,11 @@ jobs:
       - name: Build ${{ matrix.app.name }} app
         run: npm run build -w ${{ matrix.app.workspace }}
 
-      - name: Deploy ${{ matrix.app.name }} to FTP
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+      - name: 📂 Sync files
+        uses: SamKirkland/FTP-Deploy-Action@4.0.0
         with:
           server: 103.38.50.181
-          username: mfeftpuser
-          password: ${{ secrets.FTPPASSWORD }}
-          protocol: ftps
+          username: ziffariwebapi
+          password: ${{secrets.FTPAPIPASSWORD}}
           local-dir: ${{ matrix.app.workspace }}/dist/
+          

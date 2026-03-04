@@ -1,41 +1,98 @@
-import React from "react";
-import { BrowserRouter, Navigate, Route, Routes } from "react-router-dom";
-import Menu from "./Menu";
-import RemoteComponent from "./RemoteComponent";
-import { mfeConfig } from "./mfe-config";
+import React, { useEffect } from "react";
+import { BrowserRouter } from "react-router-dom";
+import { AuthProvider, useAuth } from "./AuthContext";
+import { ShellProvider, useShell } from "./ShellContext";
+import Sidebar from "./Sidebar";
+import ContentArea from "./ContentArea";
+import "./styles.css";
+
+function AuthenticatedApp() {
+  const { isAuthenticated, isLoading: authLoading, user, login, logout } = useAuth();
+  const { restoreFromUrl, isLoading: shellLoading, error, selectedProfile } = useShell();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      restoreFromUrl();
+    }
+  }, [isAuthenticated, restoreFromUrl]);
+
+  if (authLoading) {
+    return (
+      <div className="shell shell--loading">
+        <div className="shell__loader">
+          <div className="shell__spinner" />
+          <p>Checking authentication...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAuthenticated) {
+    return (
+      <div className="shell shell--login">
+        <div className="shell__login-card">
+          <h1>MFE Shell</h1>
+          <p>Please login to access the application</p>
+          <button className="shell__login-btn" onClick={login}>
+            Login with SSO
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="shell">
+      <header className="shell__header">
+        <div className="shell__header-left">
+          <h1>MFE Shell</h1>
+          <span className="shell__header-subtitle">Enterprise Micro Frontend Platform</span>
+        </div>
+        <div className="shell__header-right">
+          <span className="shell__user">
+            <span className="shell__user-icon">👤</span>
+            {user?.DisplayName}
+          </span>
+          <button className="shell__logout-btn" onClick={logout}>
+            Logout
+          </button>
+        </div>
+      </header>
+
+      <div className="shell__body">
+        {selectedProfile && <Sidebar />}
+        <main className={`shell__content ${!selectedProfile ? 'shell__content--full' : ''}`}>
+          {shellLoading && (
+            <div className="shell__content-loader">
+              <div className="shell__spinner shell__spinner--small" />
+              <span>Loading...</span>
+            </div>
+          )}
+          {error && (
+            <div className="shell__error">
+              <strong>Error:</strong> {error}
+            </div>
+          )}
+          <ContentArea />
+        </main>
+      </div>
+    </div>
+  );
+}
 
 export default function App() {
   return (
-    <BrowserRouter>
-      <div className="shell">
-        <header className="shell__header">
-          <h1>MFE Shell</h1>
-          <p>Dynamic runtime micro frontend loader</p>
-        </header>
-
-        <Menu />
-
-        <main className="shell__content">
-          <Routes>
-            {mfeConfig.map((mfe) => (
-              <Route
-                key={mfe.name}
-                path={`${mfe.route}/*`}
-                element={
-                  <RemoteComponent
-                    name={mfe.name}
-                    remoteEntry={mfe.remoteEntry}
-                    scope={mfe.scope}
-                    exposedModule={mfe.exposedModule}
-                    basePath={mfe.route}
-                  />
-                }
-              />
-            ))}
-            <Route path="*" element={<Navigate to={mfeConfig[0].route} replace />} />
-          </Routes>
-        </main>
-      </div>
+    <BrowserRouter
+      future={{
+        v7_startTransition: true,
+        v7_relativeSplatPath: true,
+      }}
+    >
+      <AuthProvider>
+        <ShellProvider>
+          <AuthenticatedApp />
+        </ShellProvider>
+      </AuthProvider>
     </BrowserRouter>
   );
 }

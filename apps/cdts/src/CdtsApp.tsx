@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useMemo, useState, useEffect } from "react";
 import "./cdts.css";
 
 type Props = {
@@ -17,9 +17,19 @@ const tasks: Task[] = Array.from({ length: 18 }, (_, index) => ({
 }));
 
 const CdtsApp = ({
-  routePath = `${window.location.pathname}${window.location.search}`,
   basePath = "/tasks"
 }: Props) => {
+  const [currentUrl, setCurrentUrl] = useState(`${window.location.pathname}${window.location.search}`);
+
+  useEffect(() => {
+    const handlePopstate = () => {
+      setCurrentUrl(`${window.location.pathname}${window.location.search}`);
+    };
+    window.addEventListener("popstate", handlePopstate);
+    return () => window.removeEventListener("popstate", handlePopstate);
+  }, []);
+
+  const routePath = currentUrl;
   const detailMatch = routePath.match(/\/details\/(\d+)/);
   const detailId = detailMatch ? Number(detailMatch[1]) : null;
   const detailTask = tasks.find((item) => item.id === detailId);

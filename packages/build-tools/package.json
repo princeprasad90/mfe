@@ -1,0 +1,13 @@
+{
+  "name": "@mfe/build-tools",
+  "version": "1.0.0",
+  "description": "Shared build tools for MFE platform",
+  "main": "postcss-mfe-scope.js",
+  "exports": {
+    ".": "./postcss-mfe-scope.js",
+    "./postcss-mfe-scope": "./postcss-mfe-scope.js"
+  },
+  "dependencies": {
+    "postcss": "^8.4.38"
+  }
+}

@@ -21,7 +21,10 @@ export class ApiError extends Error {
 }
 
 // Core fetch wrapper
-const api = async <T>(endpoint: string, options: RequestInit = {}): Promise<T> => {
+const api = async <T>(
+  endpoint: string,
+  options: RequestInit = {},
+): Promise<T> => {
   const response = await fetch(`${BFF_URL}${endpoint}`, {
     ...options,
     credentials: "include",
@@ -38,7 +41,10 @@ const api = async <T>(endpoint: string, options: RequestInit = {}): Promise<T> =
   }
 
   if (!response.ok) {
-    throw new ApiError(response.status, `${response.status} ${response.statusText}`);
+    throw new ApiError(
+      response.status,
+      `${response.status} ${response.statusText}`,
+    );
   }
 
   // Handle empty responses
@@ -57,7 +63,8 @@ export const authApi = {
 // Shell API
 export const shellApi = {
   getApplications: () => api<Application[]>("/shell/apps"),
-  getProfiles: (appId: string) => api<Profile[]>(`/shell/apps/${appId}/profiles`),
+  getProfiles: (appId: string) =>
+    api<Profile[]>(`/shell/apps/${appId}/profiles`),
   getMenus: (appId: string, profileId: string) =>
     api<MenuItem[]>(`/shell/apps/${appId}/profiles/${profileId}/menus`),
 };

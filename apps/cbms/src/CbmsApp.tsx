@@ -69,7 +69,7 @@ const CbmsApp = ({
         <p><strong>Customer:</strong> {detailItem.customer}</p>
         <p><strong>Amount:</strong> ${detailItem.amount}</p>
         <p><strong>Status:</strong> {detailItem.status}</p>
-        <button className="mfe__button" onClick={() => goTo(`${basePath}?page=${currentPage}`)}>Back to Listing</button>
+        <button className="button" onClick={() => goTo(`${basePath}?page=${currentPage}`)}>Back to Listing</button>
       </div>
     );
   }
@@ -77,41 +77,41 @@ const CbmsApp = ({
   return (
     <div className="mfe">
       <h2>Payments Listing</h2>
-      <ul className="mfe__list">
+      <ul className="list">
         {pagedItems.map((payment) => (
-          <li key={payment.id} className="mfe__list-item">
+          <li key={payment.id} className="list-item">
             <span>{payment.customer} - ${payment.amount}</span>
-            <button className="mfe__ghost" onClick={() => goTo(`${basePath}/details/${payment.id}?page=${currentPage}`)}>Details</button>
+            <button className="ghost" onClick={() => goTo(`${basePath}/details/${payment.id}?page=${currentPage}`)}>Details</button>
           </li>
         ))}
       </ul>
-      <div className="mfe__pager">
-        <button className="mfe__ghost" disabled={currentPage <= 1} onClick={() => goTo(`${basePath}?page=${currentPage - 1}`)}>Previous</button>
+      <div className="pager">
+        <button className="ghost" disabled={currentPage <= 1} onClick={() => goTo(`${basePath}?page=${currentPage - 1}`)}>Previous</button>
         <span>Page {currentPage} of {totalPages}</span>
-        <button className="mfe__ghost" disabled={currentPage >= totalPages} onClick={() => goTo(`${basePath}?page=${currentPage + 1}`)}>Next</button>
+        <button className="ghost" disabled={currentPage >= totalPages} onClick={() => goTo(`${basePath}?page=${currentPage + 1}`)}>Next</button>
       </div>
 
       {/* Demo: Shell Integration Features */}
-      <div className="mfe__demo-section">
+      <div className="demo-section">
         <h3>Shell Integration Demo</h3>
-        <div className="mfe__demo-row">
-          <span className="mfe__demo-label">Notifications:</span>
-          <button className="mfe__button mfe__button--success" onClick={() => shellNotify('success', 'Success!', 'Payment processed successfully.')}>
+        <div className="demo-row">
+          <span className="demo-label">Notifications:</span>
+          <button className="button button--success" onClick={() => shellNotify('success', 'Success!', 'Payment processed successfully.')}>
             Success
           </button>
-          <button className="mfe__button mfe__button--error" onClick={() => shellNotify('error', 'Error', 'Payment failed. Please try again.')}>
+          <button className="button button--error" onClick={() => shellNotify('error', 'Error', 'Payment failed. Please try again.')}>
             Error
           </button>
-          <button className="mfe__button mfe__button--warning" onClick={() => shellNotify('warning', 'Warning', 'Session will expire in 5 minutes.')}>
+          <button className="button button--warning" onClick={() => shellNotify('warning', 'Warning', 'Session will expire in 5 minutes.')}>
             Warning
           </button>
-          <button className="mfe__button mfe__button--info" onClick={() => shellNotify('info', 'Info', 'New features are available.')}>
+          <button className="button button--info" onClick={() => shellNotify('info', 'Info', 'New features are available.')}>
             Info
           </button>
         </div>
-        <div className="mfe__demo-row">
-          <span className="mfe__demo-label">Loading:</span>
-          <button className="mfe__button" onClick={() => { showLoader(); setTimeout(hideLoader, 2000); }}>
+        <div className="demo-row">
+          <span className="demo-label">Loading:</span>
+          <button className="button" onClick={() => { showLoader(); setTimeout(hideLoader, 2000); }}>
             Show Loader (2s)
           </button>
         </div>

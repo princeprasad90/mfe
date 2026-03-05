@@ -21,13 +21,17 @@ public class JwtService : IJwtService
     {
         _settings = settings;
 
+        // Convert escaped newlines to actual newlines (needed when reading from JSON config)
+        var privateKeyPem = settings.PrivateKey.Replace("\\n", "\n");
+        var publicKeyPem = settings.PublicKey.Replace("\\n", "\n");
+
         // Load private key (for signing)
         _privateKey = RSA.Create();
-        _privateKey.ImportFromPem(settings.PrivateKey);
+        _privateKey.ImportFromPem(privateKeyPem);
 
         // Load public key (for validation)
         _publicKey = RSA.Create();
-        _publicKey.ImportFromPem(settings.PublicKey);
+        _publicKey.ImportFromPem(publicKeyPem);
     }
 
     public string GenerateToken(string userId, string email, string displayName)

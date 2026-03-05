@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("ShellBff")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+1e8068a00cbe37cc6f39f7675ef760cbc2c159f7")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+210e87fd69ef8649664457a25c2148018231ba07")]
 [assembly: System.Reflection.AssemblyProductAttribute("ShellBff")]
 [assembly: System.Reflection.AssemblyTitleAttribute("ShellBff")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

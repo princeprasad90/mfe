@@ -1,5 +1,6 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
+using System.Text;
 
 namespace ShellBff;
 
@@ -10,7 +11,11 @@ public static class AuthEndpoints
         // Login page (GET)
         app.MapGet("/auth/login", (HttpContext context) =>
         {
-            var returnUrl = context.Request.Query["returnUrl"].FirstOrDefault() ?? settings.DefaultReturnUrl;
+            // returnUrl is base64 encoded to avoid IIS blocking :// in query strings
+            var encodedReturnUrl = context.Request.Query["returnUrl"].FirstOrDefault();
+            var returnUrl = !string.IsNullOrEmpty(encodedReturnUrl)
+                ? TryDecodeBase64(encodedReturnUrl) ?? settings.DefaultReturnUrl
+                : settings.DefaultReturnUrl;
 
             var html = $$"""
             <!DOCTYPE html>
@@ -130,5 +135,20 @@ public static class AuthEndpoints
                 Audience = shellSettings.Jwt.Audience
             });
         });
+    }
+
+    // Helper to safely decode base64 returnUrl
+    private static string? TryDecodeBase64(string encoded)
+    {
+        try
+        {
+            var bytes = Convert.FromBase64String(encoded);
+            return Encoding.UTF8.GetString(bytes);
+        }
+        catch
+        {
+            // If not valid base64, return as-is (backwards compatibility)
+            return encoded;
+        }
     }
 }

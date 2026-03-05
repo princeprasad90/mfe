@@ -69,7 +69,7 @@ jobs:
       - name: Publish shell-bff
         run: dotnet publish backend/shell-bff/ShellBff.csproj -c Release -o backend/shell-bff/publish
 
-      - name: 📂 Sync API files
+      - name: 📂 Sync API filess
         uses: SamKirkland/FTP-Deploy-Action@4.0.0
         with:
           server: 103.38.50.181

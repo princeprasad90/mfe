@@ -4,7 +4,7 @@ import { AuthProvider, useAuth } from "./AuthContext";
 import { ShellProvider, useShell } from "./ShellContext";
 import Sidebar from "./Sidebar";
 import ContentArea from "./ContentArea";
-import { NotificationContainer, GlobalLoader } from "./components";
+import { NotificationContainer, GlobalLoader, Breadcrumb } from "./components";
 import "./styles.css";
 
 function AuthenticatedApp() {
@@ -46,8 +46,10 @@ function AuthenticatedApp() {
     <div className="shell">
       <header className="shell__header">
         <div className="shell__header-left">
-          <h1>MFE Shell</h1>
-          <span className="shell__header-subtitle">Enterprise Micro Frontend Platform</span>
+          <div className="shell__logo">
+            <span className="shell__logo-icon">◆</span>
+            <span className="shell__logo-text">MFE Shell</span>
+          </div>
         </div>
         <div className="shell__header-right">
           <span className="shell__user">
@@ -59,6 +61,8 @@ function AuthenticatedApp() {
           </button>
         </div>
       </header>
+
+      <Breadcrumb />
 
       <div className="shell__body">
         {selectedProfile && <Sidebar />}

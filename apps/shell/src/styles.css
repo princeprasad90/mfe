@@ -1,19 +1,20 @@
 /* ===== CSS Variables ===== */
 :root {
-  --shell-primary: #111827;
-  --shell-primary-light: #1f2937;
-  --shell-accent: #3b82f6;
-  --shell-accent-hover: #2563eb;
+  --shell-primary: #000000;
+  --shell-primary-light: #1a1a1a;
+  --shell-accent: #de1621;
+  --shell-accent-hover: #b81219;
   --shell-success: #10b981;
-  --shell-error: #ef4444;
+  --shell-error: #de1621;
   --shell-warning: #f59e0b;
-  --shell-bg: #f3f4f6;
+  --shell-bg: #f5f5f5;
   --shell-surface: #ffffff;
-  --shell-border: #e5e7eb;
-  --shell-text: #111827;
-  --shell-text-muted: #6b7280;
+  --shell-border: #e0e0e0;
+  --shell-text: #000000;
+  --shell-text-muted: #666666;
   --sidebar-width: 280px;
   --header-height: 64px;
+  --breadcrumb-height: 48px;
 }
 
 /* ===== Reset & Base ===== */
@@ -175,11 +176,7 @@ body {
 }
 
 /* ===== Body Layout ===== */
-.shell__body {
-  display: flex;
-  flex: 1;
-  height: calc(100vh - var(--header-height));
-}
+/* See bottom of file for updated height calculation with breadcrumb */
 
 /* ===== Sidebar ===== */
 .sidebar {
@@ -571,6 +568,24 @@ body {
   .content-area__cards {
     grid-template-columns: 1fr;
   }
+
+  .breadcrumb {
+    padding: 0 16px;
+    overflow-x: auto;
+  }
+
+  .breadcrumb__text {
+    max-width: 100px;
+  }
+
+  .search-box {
+    max-width: 100%;
+  }
+
+  .content-area__app-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
 }
 
 /* ===== Notification Container ===== */
@@ -725,3 +740,250 @@ body {
   color: var(--shell-text-muted);
 }
 
+/* ===== Header Logo ===== */
+.shell__logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.shell__logo-icon {
+  font-size: 24px;
+  color: var(--shell-accent);
+}
+
+.shell__logo-text {
+  font-size: 20px;
+  font-weight: 700;
+  color: white;
+}
+
+/* ===== Breadcrumb Navigation ===== */
+.breadcrumb {
+  background: var(--shell-surface);
+  border-bottom: 1px solid var(--shell-border);
+  height: var(--breadcrumb-height);
+  display: flex;
+  align-items: center;
+  padding: 0 24px;
+}
+
+.breadcrumb__container {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+.breadcrumb__home {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  background: var(--shell-bg);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  color: var(--shell-text-muted);
+  transition: all 0.2s;
+}
+
+.breadcrumb__home:hover {
+  background: var(--shell-accent);
+  color: white;
+}
+
+.breadcrumb__separator {
+  color: var(--shell-text-muted);
+  font-size: 14px;
+  user-select: none;
+}
+
+.breadcrumb__item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: none;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  color: var(--shell-text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+
+.breadcrumb__item:hover:not(:disabled) {
+  background: var(--shell-bg);
+  color: var(--shell-text);
+}
+
+.breadcrumb__item:disabled {
+  cursor: default;
+}
+
+.breadcrumb__item--active {
+  background: var(--shell-bg);
+  color: var(--shell-text);
+  border-color: var(--shell-border);
+}
+
+.breadcrumb__item--current {
+  background: var(--shell-accent);
+  color: white;
+  border-color: var(--shell-accent);
+}
+
+.breadcrumb__icon {
+  font-size: 16px;
+}
+
+.breadcrumb__text {
+  max-width: 150px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.breadcrumb__logo {
+  height: 24px;
+  width: auto;
+  max-width: 120px;
+  object-fit: contain;
+}
+
+/* ===== Search Box ===== */
+.content-area__search {
+  margin-bottom: 24px;
+}
+
+.search-box {
+  position: relative;
+  display: flex;
+  align-items: center;
+  max-width: 500px;
+}
+
+.search-box__icon {
+  position: absolute;
+  left: 14px;
+  color: var(--shell-text-muted);
+  pointer-events: none;
+}
+
+.search-box__input {
+  width: 100%;
+  padding: 12px 44px;
+  font-size: 15px;
+  border: 2px solid var(--shell-border);
+  border-radius: 10px;
+  background: var(--shell-bg);
+  color: var(--shell-text);
+  transition: all 0.2s;
+}
+
+.search-box__input:focus {
+  outline: none;
+  border-color: var(--shell-accent);
+  background: var(--shell-surface);
+  box-shadow: 0 0 0 3px rgba(222, 22, 33, 0.1);
+}
+
+.search-box__input::placeholder {
+  color: var(--shell-text-muted);
+}
+
+.search-box__clear {
+  position: absolute;
+  right: 12px;
+  background: var(--shell-border);
+  border: none;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  color: var(--shell-text-muted);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.search-box__clear:hover {
+  background: var(--shell-accent);
+  color: white;
+}
+
+.search-box__results {
+  margin: 12px 0 0;
+  font-size: 13px;
+  color: var(--shell-text-muted);
+}
+
+/* ===== App Logo in Cards ===== */
+.content-card__logo {
+  height: 32px;
+  width: 144px;
+  object-fit: contain;
+  margin-bottom: 12px;
+}
+
+/* ===== App Header with Logo ===== */
+.content-area__app-header {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 8px;
+}
+
+.content-area__app-logo {
+  height: 32px;
+  width: 144px;
+  object-fit: contain;
+}
+
+.content-area__app-icon {
+  font-size: 48px;
+}
+
+.content-area__app-header h2 {
+  margin: 0 0 4px;
+}
+
+.content-area__app-header p {
+  margin: 0;
+}
+
+/* ===== Clear Search Button ===== */
+.content-area__clear-btn {
+  margin-top: 16px;
+  padding: 10px 20px;
+  background: var(--shell-accent);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.content-area__clear-btn:hover {
+  background: var(--shell-accent-hover);
+}
+
+/* ===== Updated Body Layout with Breadcrumb ===== */
+.shell__body {
+  display: flex;
+  flex: 1;
+  height: calc(100vh - var(--header-height) - var(--breadcrumb-height));
+}
+
+/* Hide breadcrumb height from calculation when no breadcrumb */
+.shell__body--no-breadcrumb {
+  height: calc(100vh - var(--header-height));
+}

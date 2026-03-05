@@ -10,6 +10,7 @@ export type Application = {
   Name: string;
   Description: string;
   Icon?: string;
+  LogoUrl?: string; // 144x32 logo image
 };
 
 export type Profile = {

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useMemo } from "react";
 import { useShell } from "./ShellContext";
 import type { Application, Profile } from "./types";
 import MfeContainer from "./MfeContainer";
@@ -15,6 +15,19 @@ export default function ContentArea() {
     goBack,
   } = useShell();
 
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Filter applications based on search query
+  const filteredApplications = useMemo(() => {
+    if (!searchQuery.trim()) return applications;
+    const query = searchQuery.toLowerCase();
+    return applications.filter(
+      (app) =>
+        app.Name.toLowerCase().includes(query) ||
+        app.Description.toLowerCase().includes(query)
+    );
+  }, [applications, searchQuery]);
+
   // Show MFE when menu item is selected
   if (selectedMenu) {
     return <MfeContainer />;
@@ -25,11 +38,21 @@ export default function ContentArea() {
     return (
       <div className="content-area">
         <div className="content-area__header">
-          <button className="content-area__back-btn" onClick={goBack}>
-            ← Back to Applications
-          </button>
-          <h2>{selectedApplication.Name}</h2>
-          <p>{selectedApplication.Description}</p>
+          <div className="content-area__app-header">
+            {selectedApplication.LogoUrl ? (
+              <img
+                src={selectedApplication.LogoUrl}
+                alt={selectedApplication.Name}
+                className="content-area__app-logo"
+              />
+            ) : (
+              <span className="content-area__app-icon">{selectedApplication.Icon || "📦"}</span>
+            )}
+            <div>
+              <h2>{selectedApplication.Name}</h2>
+              <p>{selectedApplication.Description}</p>
+            </div>
+          </div>
         </div>
         <h3 className="content-area__subtitle">Select a Profile</h3>
         <div className="content-area__cards">
@@ -59,11 +82,21 @@ export default function ContentArea() {
     return (
       <div className="content-area">
         <div className="content-area__header">
-          <button className="content-area__back-btn" onClick={goBack}>
-            ← Back to Profiles
-          </button>
-          <h2>{selectedApplication?.Name} - {selectedProfile.Name}</h2>
-          <p>{selectedProfile.Description}</p>
+          <div className="content-area__app-header">
+            {selectedApplication?.LogoUrl ? (
+              <img
+                src={selectedApplication.LogoUrl}
+                alt={selectedApplication.Name}
+                className="content-area__app-logo"
+              />
+            ) : (
+              <span className="content-area__app-icon">{selectedApplication?.Icon || "📦"}</span>
+            )}
+            <div>
+              <h2>{selectedProfile.Name}</h2>
+              <p>{selectedProfile.Description}</p>
+            </div>
+          </div>
         </div>
         <div className="content-area__prompt">
           <div className="content-area__prompt-icon">👈</div>
@@ -74,26 +107,78 @@ export default function ContentArea() {
     );
   }
 
-  // Show applications (default state)
+  // Show applications (default state) with search
   return (
     <div className="content-area">
       <div className="content-area__header">
         <h2>Select an Application</h2>
-        <p>Choose an application to get started</p>
+        <p>Choose an application to get started ({applications.length} available)</p>
       </div>
+
+      {/* Search Box */}
+      <div className="content-area__search">
+        <div className="search-box">
+          <svg className="search-box__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <circle cx="11" cy="11" r="8" />
+            <path d="M21 21l-4.35-4.35" />
+          </svg>
+          <input
+            type="text"
+            className="search-box__input"
+            placeholder="Search applications..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            autoFocus
+          />
+          {searchQuery && (
+            <button
+              className="search-box__clear"
+              onClick={() => setSearchQuery("")}
+              title="Clear search"
+            >
+              ✕
+            </button>
+          )}
+        </div>
+        {searchQuery && (
+          <p className="search-box__results">
+            Found {filteredApplications.length} of {applications.length} applications
+          </p>
+        )}
+      </div>
+
+      {/* Applications Grid */}
       <div className="content-area__cards">
-        {applications.map((app: Application) => (
+        {filteredApplications.map((app: Application) => (
           <div
             key={app.Id}
             className="content-card content-card--app"
             onClick={() => selectApplication(app)}
           >
-            <div className="content-card__icon">{app.Icon || "📦"}</div>
+            {app.LogoUrl ? (
+              <img
+                src={app.LogoUrl}
+                alt={app.Name}
+                className="content-card__logo"
+              />
+            ) : (
+              <div className="content-card__icon">{app.Icon || "📦"}</div>
+            )}
             <h4 className="content-card__title">{app.Name}</h4>
             <p className="content-card__desc">{app.Description}</p>
           </div>
         ))}
       </div>
+
+      {filteredApplications.length === 0 && applications.length > 0 && (
+        <div className="content-area__empty">
+          <p>No applications match "{searchQuery}"</p>
+          <button className="content-area__clear-btn" onClick={() => setSearchQuery("")}>
+            Clear search
+          </button>
+        </div>
+      )}
+
       {applications.length === 0 && (
         <div className="content-area__empty">
           <p>No applications available</p>

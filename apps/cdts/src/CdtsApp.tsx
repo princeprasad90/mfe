@@ -56,7 +56,7 @@ const CdtsApp = ({
         <p><strong>Title:</strong> {detailTask.title}</p>
         <p><strong>Owner:</strong> {detailTask.owner}</p>
         <p><strong>Priority:</strong> {detailTask.priority}</p>
-        <button className="mfe__button" onClick={() => goTo(`${basePath}?page=${currentPage}`)}>Back to Listing</button>
+        <button className="button" onClick={() => goTo(`${basePath}?page=${currentPage}`)}>Back to Listing</button>
       </div>
     );
   }
@@ -64,18 +64,18 @@ const CdtsApp = ({
   return (
     <div className="mfe">
       <h2>Tasks Listing</h2>
-      <ul className="mfe__list">
+      <ul className="list">
         {pagedItems.map((task) => (
-          <li key={task.id} className="mfe__list-item">
+          <li key={task.id} className="list-item">
             <span>{task.title}</span>
-            <button className="mfe__ghost" onClick={() => goTo(`${basePath}/details/${task.id}?page=${currentPage}`)}>Details</button>
+            <button className="ghost" onClick={() => goTo(`${basePath}/details/${task.id}?page=${currentPage}`)}>Details</button>
           </li>
         ))}
       </ul>
-      <div className="mfe__pager">
-        <button className="mfe__ghost" disabled={currentPage <= 1} onClick={() => goTo(`${basePath}?page=${currentPage - 1}`)}>Previous</button>
+      <div className="pager">
+        <button className="ghost" disabled={currentPage <= 1} onClick={() => goTo(`${basePath}?page=${currentPage - 1}`)}>Previous</button>
         <span>Page {currentPage} of {totalPages}</span>
-        <button className="mfe__ghost" disabled={currentPage >= totalPages} onClick={() => goTo(`${basePath}?page=${currentPage + 1}`)}>Next</button>
+        <button className="ghost" disabled={currentPage >= totalPages} onClick={() => goTo(`${basePath}?page=${currentPage + 1}`)}>Next</button>
       </div>
     </div>
   );

@@ -39,7 +39,7 @@
 }
 
 /* List */
-.mfe__list {
+.list {
   list-style: none;
   padding: 0;
   margin: 0;
@@ -47,7 +47,7 @@
   gap: 12px;
 }
 
-.mfe__list-item {
+.list-item {
   background: white;
   border: 1px solid var(--border);
   border-radius: 8px;
@@ -58,13 +58,13 @@
   transition: transform 0.15s, box-shadow 0.15s;
 }
 
-.mfe__list-item:hover {
+.list-item:hover {
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(8, 145, 178, 0.15);
 }
 
 /* Buttons */
-.mfe__button {
+.button {
   background: var(--primary);
   color: white;
   border: none;
@@ -76,11 +76,11 @@
   transition: background 0.2s;
 }
 
-.mfe__button:hover {
+.button:hover {
   background: var(--primary-dark);
 }
 
-.mfe__ghost {
+.ghost {
   background: transparent;
   color: var(--primary);
   border: 1px solid var(--border);
@@ -91,17 +91,17 @@
   transition: background 0.2s;
 }
 
-.mfe__ghost:hover {
+.ghost:hover {
   background: var(--bg);
 }
 
-.mfe__ghost:disabled {
+.ghost:disabled {
   opacity: 0.5;
   cursor: not-allowed;
 }
 
 /* Pagination */
-.mfe__pager {
+.pager {
   margin-top: 20px;
   display: flex;
   justify-content: space-between;
@@ -112,7 +112,7 @@
 }
 
 /* Demo Section */
-.mfe__demo-section {
+.demo-section {
   margin-top: 24px;
   padding: 20px;
   background: #f8fafc;
@@ -120,7 +120,7 @@
   border-radius: 10px;
 }
 
-.mfe__demo-section h3 {
+.demo-section h3 {
   margin: 0 0 16px;
   color: #475569;
   font-size: 14px;
@@ -128,7 +128,7 @@
   letter-spacing: 0.5px;
 }
 
-.mfe__demo-row {
+.demo-row {
   display: flex;
   align-items: center;
   gap: 10px;
@@ -136,45 +136,45 @@
   margin-bottom: 12px;
 }
 
-.mfe__demo-row:last-child {
+.demo-row:last-child {
   margin-bottom: 0;
 }
 
-.mfe__demo-label {
+.demo-label {
   font-size: 13px;
   color: #64748b;
   min-width: 100px;
 }
 
-.mfe__button--success {
+.button--success {
   background: #10b981;
 }
 
-.mfe__button--success:hover {
+.button--success:hover {
   background: #059669;
 }
 
-.mfe__button--error {
+.button--error {
   background: #ef4444;
 }
 
-.mfe__button--error:hover {
+.button--error:hover {
   background: #dc2626;
 }
 
-.mfe__button--warning {
+.button--warning {
   background: #f59e0b;
 }
 
-.mfe__button--warning:hover {
+.button--warning:hover {
   background: #d97706;
 }
 
-.mfe__button--info {
+.button--info {
   background: #3b82f6;
 }
 
-.mfe__button--info:hover {
+.button--info:hover {
   background: #2563eb;
 }
 

@@ -11,7 +11,6 @@ public static class AuthEndpoints
         app.MapGet("/auth/login", (HttpContext context) =>
         {
             var returnUrl = context.Request.Query["returnUrl"].FirstOrDefault() ?? settings.DefaultReturnUrl;
-            var escapedReturnUrl = Uri.EscapeDataString(returnUrl);
 
             var html = $$"""
             <!DOCTYPE html>
@@ -33,7 +32,8 @@ public static class AuthEndpoints
             <body>
                 <div class="login-box">
                     <h1>MFE Shell Login</h1>
-                    <form method="POST" action="/auth/login?returnUrl={{escapedReturnUrl}}">
+                    <form method="POST" action="/auth/login">
+                        <input type="hidden" name="returnUrl" value="{{returnUrl}}" />
                         <label for="username">Username</label>
                         <input type="text" id="username" name="username" placeholder="Enter any username" required />
                         <label for="displayName">Display Name</label>
@@ -55,7 +55,10 @@ public static class AuthEndpoints
             var form = await context.Request.ReadFormAsync();
             var username = form["username"].FirstOrDefault() ?? "user";
             var displayName = form["displayName"].FirstOrDefault() ?? "User";
-            var returnUrl = context.Request.Query["returnUrl"].FirstOrDefault() ?? settings.DefaultReturnUrl;
+            // returnUrl comes from hidden form field (POST body) to avoid IIS blocking :// in query strings
+            var returnUrl = form["returnUrl"].FirstOrDefault()
+                         ?? context.Request.Query["returnUrl"].FirstOrDefault()
+                         ?? settings.DefaultReturnUrl;
 
             // Generate unique user ID (mock - in real SAML this comes from IdP)
             var userId = $"user-{username.ToLower().Replace(" ", "-")}-{Guid.NewGuid().ToString("N")[..8]}";

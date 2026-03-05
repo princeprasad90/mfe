@@ -35,7 +35,8 @@ const api = async <T>(
   });
 
   if (response.status === 401) {
-    const returnUrl = encodeURIComponent(window.location.href);
+    // Base64 encode returnUrl to avoid IIS blocking :// in query strings
+    const returnUrl = btoa(window.location.href);
     window.location.href = `${BFF_URL}/auth/login?returnUrl=${returnUrl}`;
     throw new ApiError(401, "Unauthorized");
   }
@@ -56,8 +57,9 @@ const api = async <T>(
 export const authApi = {
   me: () => api<User>("/auth/me"),
   logout: () => api<void>("/auth/logout", { method: "POST" }),
+  // Base64 encode returnUrl to avoid IIS blocking :// in query strings
   loginUrl: (returnUrl = window.location.href) =>
-    `${BFF_URL}/auth/login?returnUrl=${encodeURIComponent(returnUrl)}`,
+    `${BFF_URL}/auth/login?returnUrl=${btoa(returnUrl)}`,
 };
 
 // Shell API

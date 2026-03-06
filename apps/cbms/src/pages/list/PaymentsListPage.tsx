@@ -1,6 +1,6 @@
 import React, { useMemo, useEffect, useState } from "react";
 import { getPaymentsPage, getTotalPages } from "../../services/payments.service";
-import { shellNotify, showLoader, hideLoader } from "@mfe/notification-sdk";
+import { shellNotify, showLoader, hideLoader } from "@mfe/platform-events";
 
 // Event payload type for an incoming cross-MFE event.
 // Define the shape here — no import from the other MFE.

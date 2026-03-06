@@ -1,4 +1,5 @@
-declare module "./mfe-entry.js" {
-  export function mount(): void;
-  export function unmount(): void;
-}
+export declare function mount(
+  container?: HTMLElement,
+  props?: Record<string, unknown>,
+): void;
+export declare function unmount(): void;

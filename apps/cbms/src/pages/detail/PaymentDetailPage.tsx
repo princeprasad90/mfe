@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import { getPaymentById } from "../../services/payments.service";
-import { shellNotify } from "@mfe/notification-sdk";
+import { shellNotify } from "@mfe/platform-events";
 
 // Event payload shapes for events emitted by this page.
 // These types stay inside CBMS — other MFEs define their own matching types.

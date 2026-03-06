@@ -3,11 +3,25 @@
     "target": "ES2020",
     "lib": ["ES2020", "DOM", "DOM.Iterable"],
     "module": "ESNext",
-    "moduleResolution": "Bundler",
+    "moduleResolution": "node",
     "jsx": "react-jsx",
     "strict": true,
     "skipLibCheck": true,
-    "noEmit": true
+    "noEmit": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "paths": {
+      "@mfe/platform-ui": ["./packages/platform-ui/src/index.ts"],
+      "@mfe/platform-ui/*": ["./packages/platform-ui/src/*"],
+      "@mfe/platform-events": ["./packages/platform-events/src/index.ts"],
+      "@mfe/platform-core": ["./packages/platform-core/src/index.ts"],
+      "@mfe/platform-core/*": ["./packages/platform-core/src/*"],
+      "@mfe/platform-utils": ["./packages/platform-utils/src/index.ts"],
+      "@mfe/platform-utils/*": ["./packages/platform-utils/src/*"]
+    }
   },
-  "include": ["apps/**/*", "packages/**/*"]
+  "include": ["apps/**/*", "packages/**/*"],
+  "exclude": ["**/node_modules", "**/dist", "**/*.js"]
 }

@@ -82,7 +82,7 @@ export class EventBus implements IEventBus {
     if (!this.listeners.has(event)) {
       this.listeners.set(event, new Set());
     }
-    this.listeners.get(event)!.add(handler);
+    this.listeners.get(event)!.add(handler as EventHandler);
 
     // Replay last payload so a newly-mounted MFE doesn't miss it
     if (event !== "*" && this.lastPayloads.has(event)) {
@@ -96,7 +96,7 @@ export class EventBus implements IEventBus {
       });
     }
 
-    return () => this.off(event, handler);
+    return () => this.off(event, handler as EventHandler);
   }
 
   // ── off (unsubscribe) ───────────────────────────────────────────────────

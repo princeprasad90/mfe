@@ -41,6 +41,10 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      # Lockfile is generated on Windows — restore Linux-native Rollup binary
+      - name: Fix Rollup platform binary
+        run: npm install --no-save @rollup/rollup-linux-x64-gnu
+
       - name: Build ${{ matrix.app.name }} app
         run: npm run build -w ${{ matrix.app.workspace }}
 

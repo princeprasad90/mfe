@@ -1,0 +1,34 @@
+/* ── Tabs ──────────────────────────────────────────────────────────────────── */
+
+.pui-tabs {
+  display: flex;
+  flex-direction: column;
+}
+.pui-tabs__list {
+  display: flex;
+  border-bottom: 2px solid var(--pui-border);
+  gap: 0;
+}
+.pui-tabs__tab {
+  padding: var(--pui-space-sm) var(--pui-space-lg);
+  font-family: var(--pui-font);
+  font-size: var(--pui-font-size-md);
+  font-weight: 500;
+  color: var(--pui-text-muted);
+  background: none;
+  border: none;
+  border-bottom: 2px solid transparent;
+  margin-bottom: -2px;
+  cursor: pointer;
+  transition: all var(--pui-transition);
+}
+.pui-tabs__tab:hover {
+  color: var(--pui-text);
+}
+.pui-tabs__tab--active {
+  color: var(--pui-accent);
+  border-bottom-color: var(--pui-accent);
+}
+.pui-tabs__panel {
+  padding: var(--pui-space-lg) 0;
+}

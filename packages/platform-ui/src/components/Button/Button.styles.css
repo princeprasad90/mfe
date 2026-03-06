@@ -1,0 +1,58 @@
+/* ── Button ────────────────────────────────────────────────────────────────── */
+
+.pui-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--pui-space-sm);
+  padding: var(--pui-space-sm) var(--pui-space-lg);
+  font-family: var(--pui-font);
+  font-size: var(--pui-font-size-md);
+  font-weight: 500;
+  line-height: 1.5;
+  border: 1px solid transparent;
+  border-radius: var(--pui-radius-md);
+  cursor: pointer;
+  transition: all var(--pui-transition);
+  white-space: nowrap;
+}
+.pui-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.pui-btn--primary {
+  background: var(--pui-accent);
+  color: #fff;
+}
+.pui-btn--primary:hover:not(:disabled) {
+  background: var(--pui-accent-hover);
+}
+
+.pui-btn--secondary {
+  background: var(--pui-surface);
+  color: var(--pui-text);
+  border-color: var(--pui-border);
+}
+.pui-btn--secondary:hover:not(:disabled) {
+  background: var(--pui-background);
+}
+
+.pui-btn--ghost {
+  background: transparent;
+  color: var(--pui-accent);
+}
+.pui-btn--ghost:hover:not(:disabled) {
+  background: rgba(222, 22, 33, 0.06);
+}
+
+.pui-btn--danger {
+  background: var(--pui-error);
+  color: #fff;
+}
+.pui-btn--danger:hover:not(:disabled) {
+  background: #b91c1c;
+}
+
+.pui-btn--sm { padding: var(--pui-space-xs) var(--pui-space-sm); font-size: var(--pui-font-size-sm); }
+.pui-btn--lg { padding: var(--pui-space-md) var(--pui-space-xl); font-size: var(--pui-font-size-lg); }

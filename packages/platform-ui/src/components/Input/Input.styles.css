@@ -1,0 +1,17 @@
+/* ── Input ─────────────────────────────────────────────────────────────────── */
+
+.pui-input {
+  padding: var(--pui-space-sm) var(--pui-space-md);
+  font-family: var(--pui-font);
+  font-size: var(--pui-font-size-md);
+  border: 1px solid var(--pui-border);
+  border-radius: var(--pui-radius-md);
+  background: var(--pui-surface);
+  color: var(--pui-text);
+  transition: border-color var(--pui-transition), box-shadow var(--pui-transition);
+  outline: none;
+}
+.pui-input:focus {
+  border-color: var(--pui-accent);
+  box-shadow: 0 0 0 3px rgba(222, 22, 33, 0.12);
+}

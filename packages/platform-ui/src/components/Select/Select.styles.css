@@ -1,0 +1,19 @@
+/* ── Select ────────────────────────────────────────────────────────────────── */
+
+.pui-select {
+  appearance: none;
+  padding: var(--pui-space-sm) var(--pui-space-xl) var(--pui-space-sm) var(--pui-space-md);
+  font-family: var(--pui-font);
+  font-size: var(--pui-font-size-md);
+  border: 1px solid var(--pui-border);
+  border-radius: var(--pui-radius-md);
+  background: var(--pui-surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath d='M6 8L1 3h10z' fill='%2371717a'/%3E%3C/svg%3E") no-repeat right 10px center;
+  color: var(--pui-text);
+  cursor: pointer;
+  outline: none;
+  transition: border-color var(--pui-transition);
+}
+.pui-select:focus {
+  border-color: var(--pui-accent);
+  box-shadow: 0 0 0 3px rgba(222, 22, 33, 0.12);
+}

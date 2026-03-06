@@ -1,0 +1,65 @@
+/* ── Modal ─────────────────────────────────────────────────────────────────── */
+
+.pui-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: var(--pui-z-modal);
+  animation: pui-fade-in 150ms ease;
+}
+.pui-modal {
+  background: var(--pui-surface);
+  border-radius: var(--pui-radius-lg);
+  box-shadow: var(--pui-shadow-lg);
+  min-width: 360px;
+  max-width: 90vw;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+  animation: pui-scale-in 200ms ease;
+}
+.pui-modal__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--pui-space-lg) var(--pui-space-xl);
+  border-bottom: 1px solid var(--pui-border);
+}
+.pui-modal__title {
+  font-size: var(--pui-font-size-lg);
+  font-weight: 600;
+  color: var(--pui-text);
+}
+.pui-modal__close {
+  background: none;
+  border: none;
+  font-size: 20px;
+  cursor: pointer;
+  color: var(--pui-text-muted);
+  padding: 4px;
+  line-height: 1;
+}
+.pui-modal__body {
+  padding: var(--pui-space-xl);
+  overflow-y: auto;
+  flex: 1;
+}
+.pui-modal__footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--pui-space-sm);
+  padding: var(--pui-space-lg) var(--pui-space-xl);
+  border-top: 1px solid var(--pui-border);
+}
+
+@keyframes pui-fade-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+@keyframes pui-scale-in {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}

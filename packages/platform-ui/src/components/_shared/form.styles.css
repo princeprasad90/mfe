@@ -1,0 +1,22 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Shared form-element styles
+   Used by Input, Select, SmartSelect, MultiSelect, DatePicker, Form
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+.pui-input-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pui-space-xs);
+}
+.pui-input-wrapper label {
+  font-size: var(--pui-font-size-sm);
+  font-weight: 500;
+  color: var(--pui-text);
+}
+.pui-input--error {
+  border-color: var(--pui-error);
+}
+.pui-input-error {
+  font-size: var(--pui-font-size-sm);
+  color: var(--pui-error);
+}

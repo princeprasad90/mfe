@@ -1,0 +1,34 @@
+/* ── Table ─────────────────────────────────────────────────────────────────── */
+
+.pui-table-wrapper {
+  overflow-x: auto;
+  border: 1px solid var(--pui-border);
+  border-radius: var(--pui-radius-md);
+}
+.pui-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--pui-font);
+  font-size: var(--pui-font-size-md);
+}
+.pui-table th {
+  padding: var(--pui-space-md) var(--pui-space-lg);
+  text-align: left;
+  font-weight: 600;
+  font-size: var(--pui-font-size-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--pui-text-muted);
+  background: var(--pui-background);
+  border-bottom: 2px solid var(--pui-border);
+  white-space: nowrap;
+}
+.pui-table td {
+  padding: var(--pui-space-md) var(--pui-space-lg);
+  border-bottom: 1px solid var(--pui-border);
+  color: var(--pui-text);
+}
+.pui-table tr:last-child td { border-bottom: none; }
+.pui-table tr:hover td { background: rgba(0, 0, 0, 0.015); }
+
+.pui-table--striped tr:nth-child(even) td { background: var(--pui-background); }

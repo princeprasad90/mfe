@@ -3,6 +3,7 @@ import "./cbms.css";
 import { matchRoute } from "./routes";
 import PaymentsListPage from "./pages/list/PaymentsListPage";
 import PaymentDetailPage from "./pages/detail/PaymentDetailPage";
+import CreatePaymentPage from "./pages/create/CreatePaymentPage";
 
 // Props injected by the Shell via mount() — mirrors @mfe/platform-contracts MountProps
 type Props = {
@@ -29,6 +30,16 @@ const CbmsApp = ({ basePath = "/cbms", emitEvent, onEvent }: Props) => {
   };
 
   const route = matchRoute(window.location.pathname, window.location.search);
+
+  if (route.name === "create") {
+    return (
+      <CreatePaymentPage
+        basePath={basePath ?? "/cbms"}
+        goTo={goTo}
+        emitEvent={emitEvent}
+      />
+    );
+  }
 
   if (route.name === "detail") {
     return (

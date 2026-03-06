@@ -1,0 +1,37 @@
+/* ── Toast ─────────────────────────────────────────────────────────────────── */
+
+.pui-toast-container {
+  position: fixed;
+  top: var(--pui-space-lg);
+  right: var(--pui-space-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--pui-space-sm);
+  z-index: var(--pui-z-toast);
+}
+.pui-toast {
+  min-width: 260px;
+  padding: var(--pui-space-md) var(--pui-space-lg);
+  border-radius: var(--pui-radius-md);
+  background: var(--pui-primary);
+  color: #fff;
+  box-shadow: var(--pui-shadow-md);
+  animation: pui-slide-in 250ms ease;
+}
+.pui-toast--info    { border-left: 4px solid var(--pui-info); }
+.pui-toast--success { border-left: 4px solid var(--pui-success); }
+.pui-toast--warning { border-left: 4px solid var(--pui-warning); }
+.pui-toast--error   { border-left: 4px solid var(--pui-error); }
+.pui-toast__title {
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+.pui-toast__message {
+  font-size: var(--pui-font-size-sm);
+  opacity: 0.9;
+}
+
+@keyframes pui-slide-in {
+  from { opacity: 0; transform: translateX(100%); }
+  to { opacity: 1; transform: translateX(0); }
+}

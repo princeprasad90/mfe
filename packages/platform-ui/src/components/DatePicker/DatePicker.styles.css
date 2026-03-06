@@ -1,0 +1,9 @@
+/* ── DatePicker ────────────────────────────────────────────────────────────── */
+
+.pui-datepicker {
+  position: relative;
+  display: inline-block;
+}
+.pui-datepicker__input {
+  composes: pui-input;
+}

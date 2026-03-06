@@ -3,31 +3,10 @@ import { useShell } from "./ShellContext";
 import { useAuth } from "./AuthContext";
 import { loadRemoteVite } from "./mfe/loadRemoteVite";
 import type { MfeConfig } from "./types";
+import { emitEvent, onEvent } from "@mfe/platform-events";
 
-// Platform event bus with replay — defined once in the shell, injected into every MFE via mount() props.
-// Stores the last payload per event name so a newly-mounted MFE can receive
-// events that were emitted while it was not on screen (only one MFE at a time).
-const lastEventPayloads = new Map<string, unknown>();
-
-const emitEvent = <T,>(event: string, detail: T): void => {
-  lastEventPayloads.set(event, detail);          // store for replay
-  window.dispatchEvent(new CustomEvent(event, { detail }));
-};
-
-const onEvent = <T,>(
-  event: string,
-  handler: (detail: T) => void
-): (() => void) => {
-  // Replay the last stored payload immediately so the MFE doesn't miss it
-  if (lastEventPayloads.has(event)) {
-    // Defer to next micro-task so the component has finished mounting
-    Promise.resolve().then(() => handler(lastEventPayloads.get(event) as T));
-  }
-
-  const listener = (e: Event) => handler((e as CustomEvent<T>).detail);
-  window.addEventListener(event, listener);
-  return () => window.removeEventListener(event, listener);
-};
+// NOTE: emitEvent / onEvent are now provided by @mfe/platform-events (EventBus
+// singleton with replay).  Imported above and injected into every MFE via mount().
 
 // Error Boundary for MFE isolation
 type ErrorBoundaryProps = {

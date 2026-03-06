@@ -1,0 +1,26 @@
+/* ── Form ──────────────────────────────────────────────────────────────────── */
+
+.pui-form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pui-space-lg);
+}
+.pui-form__group {
+  display: flex;
+  flex-direction: column;
+  gap: var(--pui-space-xs);
+}
+.pui-form__row {
+  display: flex;
+  gap: var(--pui-space-lg);
+}
+.pui-form__row > * {
+  flex: 1;
+}
+.pui-form__actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: var(--pui-space-sm);
+  padding-top: var(--pui-space-lg);
+  border-top: 1px solid var(--pui-border);
+}

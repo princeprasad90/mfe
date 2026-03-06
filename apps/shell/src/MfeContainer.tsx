@@ -1,7 +1,23 @@
 import React, { useEffect, useRef, useState, Component, ReactNode, ErrorInfo } from "react";
 import { useShell } from "./ShellContext";
+import { useAuth } from "./AuthContext";
 import { loadRemoteVite } from "./mfe/loadRemoteVite";
 import type { MfeConfig } from "./types";
+
+// Platform event bus helpers — defined once in the shell, injected into every MFE via mount() props.
+// MFEs receive these as props and never need to access window directly.
+const emitEvent = <T,>(event: string, detail: T): void => {
+  window.dispatchEvent(new CustomEvent(event, { detail }));
+};
+
+const onEvent = <T,>(
+  event: string,
+  handler: (detail: T) => void
+): (() => void) => {
+  const listener = (e: Event) => handler((e as CustomEvent<T>).detail);
+  window.addEventListener(event, listener);
+  return () => window.removeEventListener(event, listener);
+};
 
 // Error Boundary for MFE isolation
 type ErrorBoundaryProps = {
@@ -62,6 +78,7 @@ type BootstrapModule = {
 
 // MFE Loader component
 function MfeLoader({ config }: { config: MfeConfig }) {
+  const { user } = useAuth();
   const containerRef = useRef<HTMLDivElement | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -102,6 +119,12 @@ function MfeLoader({ config }: { config: MfeConfig }) {
         await remoteModule.mount(containerRef.current, {
           basePath: config.Route,
           routePath: config.Route,
+          // Provide the current user and event bus to every MFE via mount() props
+          user: user
+            ? { id: user.UserId, email: user.Email, displayName: user.DisplayName }
+            : undefined,
+          emitEvent,
+          onEvent,
         });
 
         unmountRef.current = remoteModule.unmount;

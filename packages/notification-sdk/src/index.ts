@@ -41,6 +41,29 @@ export const hideLoader = (key: string = "default") => {
   );
 };
 
+/**
+ * Generic event bus helpers — for MFE-to-MFE or MFE-to-shell communication.
+ * Prefer using the versions injected via mount() props so MFEs stay testable.
+ */
+
+/** Emit any custom event on the platform event bus. */
+export const emitEvent = <T>(event: string, detail: T): void => {
+  window.dispatchEvent(new CustomEvent(event, { detail }));
+};
+
+/**
+ * Subscribe to a platform event bus event.
+ * Returns a cleanup function — call it in useEffect cleanup or unmount.
+ */
+export const onEvent = <T>(
+  event: string,
+  handler: (detail: T) => void,
+): (() => void) => {
+  const listener = (e: Event) => handler((e as CustomEvent<T>).detail);
+  window.addEventListener(event, listener);
+  return () => window.removeEventListener(event, listener);
+};
+
 const ensureContainer = () => {
   let container = document.getElementById(containerId);
   if (!container) {

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { BrowserRouter } from "react-router-dom";
 import { AuthProvider, useAuth } from "./AuthContext";
 import { ShellProvider, useShell } from "./ShellContext";
@@ -10,12 +10,18 @@ import "./styles.css";
 function AuthenticatedApp() {
   const { isAuthenticated, isLoading: authLoading, user, login, logout } = useAuth();
   const { restoreFromUrl, isLoading: shellLoading, error, selectedProfile } = useShell();
+  const [bannerDismissed, setBannerDismissed] = useState(false);
 
   useEffect(() => {
     if (isAuthenticated) {
       restoreFromUrl();
     }
   }, [isAuthenticated, restoreFromUrl]);
+
+  // Dismiss banner when error clears
+  useEffect(() => {
+    if (error) setBannerDismissed(false);
+  }, [error]);
 
   if (authLoading) {
     return (
@@ -44,6 +50,13 @@ function AuthenticatedApp() {
 
   return (
     <div className="shell">
+      {/* MFE Progress bar — thin top stripe during loading */}
+      {shellLoading && (
+        <div className="mfe-progress" aria-hidden="true">
+          <div className="mfe-progress__bar" />
+        </div>
+      )}
+
       <header className="shell__header">
         <div className="shell__header-left">
           <div className="shell__logo">
@@ -64,6 +77,21 @@ function AuthenticatedApp() {
 
       <Breadcrumb />
 
+      {/* Error/session banner — dismissible */}
+      {error && !bannerDismissed && (
+        <div className="shell__banner shell__banner--error" role="alert">
+          <span className="shell__banner__icon">⚠</span>
+          <span className="shell__banner__message">{error}</span>
+          <button
+            className="shell__banner__dismiss"
+            onClick={() => setBannerDismissed(true)}
+            aria-label="Dismiss error"
+          >
+            Dismiss
+          </button>
+        </div>
+      )}
+
       <div className="shell__body">
         {selectedProfile && <Sidebar />}
         <main className={`shell__content ${!selectedProfile ? 'shell__content--full' : ''}`}>
@@ -71,11 +99,6 @@ function AuthenticatedApp() {
             <div className="shell__content-loader">
               <div className="shell__spinner shell__spinner--small" />
               <span>Loading...</span>
-            </div>
-          )}
-          {error && (
-            <div className="shell__error">
-              <strong>Error:</strong> {error}
             </div>
           )}
           <ContentArea />

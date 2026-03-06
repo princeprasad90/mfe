@@ -1,0 +1,80 @@
+name: Build and Deploy via FTP
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      - newchanges
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      matrix:
+        app:
+          - name: shell
+            workspace: apps/shell
+            server-dir: /shell.heydaygift.com/
+          - name: cbms
+            workspace: apps/cbms
+            server-dir: /cbms.heydaygift.com/
+          - name: cdts
+            workspace: apps/cdts
+            server-dir: /cdts.heydaygift.com/
+          - name: mfe-products-angular
+            workspace: apps/mfe-products-angular
+            server-dir: /mfe.heydaygift.com/
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: "npm"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build ${{ matrix.app.name }} app
+        run: npm run build -w ${{ matrix.app.workspace }}
+
+      - name: 📂 Sync files
+        uses: SamKirkland/FTP-Deploy-Action@4.0.0
+        with:
+          server: 103.38.50.181
+          username: mfeftpuser
+          password: ${{ secrets.FTPPASSWORD }}
+          local-dir: ${{ matrix.app.workspace }}/dist/
+          server-dir: ${{ matrix.app.server-dir }}
+
+  build-and-deploy-api:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "8.0"
+
+      - name: Publish shell-bff
+        run: dotnet publish backend/shell-bff/ShellBff.csproj -c Release -o backend/shell-bff/publish
+
+      - name: 📂 Sync API files
+        uses: SamKirkland/FTP-Deploy-Action@4.0.0
+        with:
+          server: 103.38.50.181
+          username: mfeftpuser
+          password: ${{ secrets.FTPPASSWORD }}
+          local-dir: backend/shell-bff/publish/
+          server-dir: /api.heydaygift.com/

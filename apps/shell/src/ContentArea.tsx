@@ -2,6 +2,7 @@ import React, { useState, useMemo } from "react";
 import { useShell } from "./ShellContext";
 import type { Application, Profile } from "./types";
 import MfeContainer from "./MfeContainer";
+import { SkeletonCards } from "./components";
 
 export default function ContentArea() {
   const {
@@ -10,6 +11,7 @@ export default function ContentArea() {
     selectedApplication,
     selectedProfile,
     selectedMenu,
+    isLoading,
     selectApplication,
     selectProfile,
     goBack,
@@ -147,28 +149,34 @@ export default function ContentArea() {
         )}
       </div>
 
-      {/* Applications Grid */}
-      <div className="content-area__cards">
-        {filteredApplications.map((app: Application) => (
-          <div
-            key={app.Id}
-            className="content-card content-card--app"
-            onClick={() => selectApplication(app)}
-          >
-            {app.LogoUrl ? (
-              <img
-                src={app.LogoUrl}
-                alt={app.Name}
-                className="content-card__logo"
-              />
-            ) : (
-              <div className="content-card__icon">{app.Icon || "📦"}</div>
-            )}
-            <h4 className="content-card__title">{app.Name}</h4>
-            <p className="content-card__desc">{app.Description}</p>
-          </div>
-        ))}
-      </div>
+      {/* Applications Grid — skeleton while loading, cards when ready */}
+      {isLoading ? (
+        <SkeletonCards count={8} />
+      ) : (
+        <div className="content-area__cards">
+          {filteredApplications.map((app: Application) => (
+            <div
+              key={app.Id}
+              className="content-card content-card--app"
+              onClick={() => selectApplication(app)}
+              tabIndex={0}
+              onKeyDown={(e) => e.key === "Enter" && selectApplication(app)}
+            >
+              {app.LogoUrl ? (
+                <img
+                  src={app.LogoUrl}
+                  alt={app.Name}
+                  className="content-card__logo"
+                />
+              ) : (
+                <div className="content-card__icon">{app.Icon || "📦"}</div>
+              )}
+              <h4 className="content-card__title">{app.Name}</h4>
+              <p className="content-card__desc">{app.Description}</p>
+            </div>
+          ))}
+        </div>
+      )}
 
       {filteredApplications.length === 0 && applications.length > 0 && (
         <div className="content-area__empty">

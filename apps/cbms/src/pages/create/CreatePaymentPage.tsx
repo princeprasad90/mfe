@@ -206,7 +206,7 @@ const CreatePaymentPage: React.FC<Props> = ({ basePath, goTo }) => {
             options={statusOptions}
             placeholder="Select status"
             value={status}
-            onChange={(e) => setStatus(e.target.value)}
+            onChange={(val) => setStatus(val)}
             error={errors.status}
           />
         </FormGroup>

@@ -1,1 +1,5 @@
-/* SmartSelect reuses Select & Loader styles — no additional unique CSS. */
+/* ═══════════════════════════════════════════════════════════════════════════
+   SmartSelect — Powered by react-select
+   Styles are applied inline via the `styles` API.
+   This file provides minor overrides for the wrapper only.
+   ═══════════════════════════════════════════════════════════════════════════ */

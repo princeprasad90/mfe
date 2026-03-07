@@ -57,6 +57,7 @@ export type { FormProps } from "./components/Form";
 export { SmartSelect } from "./components/SmartSelect";
 export type {
   SmartSelectProps,
+  SmartOption,
   DataSource,
   ApiDataSource,
   StaticDataSource,

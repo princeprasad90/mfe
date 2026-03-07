@@ -6,5 +6,8 @@
   "peerDependencies": {
     "react": ">=17",
     "react-dom": ">=17"
+  },
+  "dependencies": {
+    "react-select": "^5.10.2"
   }
 }

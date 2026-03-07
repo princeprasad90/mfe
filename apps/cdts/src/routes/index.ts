@@ -1,8 +1,8 @@
 /**
- * CBMS Route Definitions
+ * CDTS Route Definitions
  *
- * Single source of truth: add one entry to `routes` + one to `cbmsPath`.
- * TypeScript ensures they stay in sync via `satisfies Record<CbmsRouteName, …>`.
+ * Single source of truth: add one entry to `routes` + one to `cdtsPath`.
+ * TypeScript ensures they stay in sync via `satisfies Record<CdtsRouteName, …>`.
  */
 
 import { createRouteMatcher, type RouteDef } from "@mfe/platform-utils";
@@ -10,8 +10,6 @@ import { createRouteMatcher, type RouteDef } from "@mfe/platform-utils";
 // ─── Route table (single source of truth) ─────────────────────────────────────
 
 const routes = [
-  { pattern: "/demo", name: "demo" },
-  { pattern: "/create", name: "create" },
   {
     pattern: "/details/:id",
     name: "detail",
@@ -24,18 +22,16 @@ const routes = [
 // ─── Derived types & matcher ──────────────────────────────────────────────────
 
 /** Auto-derived union — never edit manually. */
-export type CbmsRouteName = (typeof routes)[number]["name"];
+export type CdtsRouteName = (typeof routes)[number]["name"];
 
-export const cbmsRoutes = routes as unknown as RouteDef<CbmsRouteName>[];
-export const cbmsMatcher = createRouteMatcher(cbmsRoutes);
+export const cdtsRoutes = routes as unknown as RouteDef<CdtsRouteName>[];
+export const cdtsMatcher = createRouteMatcher(cdtsRoutes);
 
 // ─── Path builders (compiler-checked completeness) ────────────────────────────
 
-export const cbmsPath = {
-  demo: () => cbmsMatcher.buildPath("demo"),
-  create: () => cbmsMatcher.buildPath("create"),
+export const cdtsPath = {
   detail: (id: number, page?: number) =>
-    cbmsMatcher.buildPath("detail", { id }, page && page > 1 ? { page } : {}),
+    cdtsMatcher.buildPath("detail", { id }, page && page > 1 ? { page } : {}),
   list: (page?: number) =>
-    cbmsMatcher.buildPath("list", {}, page && page > 1 ? { page } : {}),
-} satisfies Record<CbmsRouteName, (...args: any[]) => string>;
+    cdtsMatcher.buildPath("list", {}, page && page > 1 ? { page } : {}),
+} satisfies Record<CdtsRouteName, (...args: any[]) => string>;

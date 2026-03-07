@@ -80,3 +80,40 @@ export type {
   UseFormBuilderReturn,
   FormFieldBinding,
 } from "./components/FormBuilder";
+
+// ── PageLayout ────────────────────────────────────────────────────────────
+export { PageLayout } from "./components/PageLayout";
+export type { PageLayoutProps, Breadcrumb } from "./components/PageLayout";
+
+// ── TableBuilder ──────────────────────────────────────────────────────────
+export { TableBuilder } from "./components/TableBuilder";
+export type {
+  TableBuilderProps,
+  TableBuilderColumn,
+  TableRowAction,
+} from "./components/TableBuilder";
+
+// ── DetailView ────────────────────────────────────────────────────────────
+export { DetailView } from "./components/DetailView";
+export type {
+  DetailViewProps,
+  DetailField,
+  DetailAction,
+} from "./components/DetailView";
+
+// ── Hooks ─────────────────────────────────────────────────────────────────
+export { useApi, useApiMutation, clearApiCache } from "./hooks";
+export type {
+  UseApiOptions,
+  UseApiFetcherOptions,
+  UseApiReturn,
+  UseApiMutationOptions,
+  UseApiMutationReturn,
+} from "./hooks";
+
+export { useMfeRouter } from "./hooks";
+export type { UseMfeRouterOptions, UseMfeRouterReturn } from "./hooks";
+
+// ── createMfeApp ──────────────────────────────────────────────────────────
+export { createMfeApp } from "./create-mfe-app";
+export type { CreateMfeAppOptions, MfeBootstrap } from "./create-mfe-app";

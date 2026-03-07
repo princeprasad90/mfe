@@ -1,13 +1,17 @@
 import "zone.js";
 import "@angular/compiler";
+import { ApplicationRef } from "@angular/core";
 import { createApplication } from "@angular/platform-browser";
-import ProductsShellComponent from "./app/products-shell.component.js";
-import { RUNTIME_PROPS } from "./app/runtime-props.js";
+import ProductsShellComponent from "./app/products-shell.component";
+import { RUNTIME_PROPS } from "./app/runtime-props";
 
-let appRef = null;
-let mountNode = null;
+let appRef: ApplicationRef | null = null;
+let mountNode: HTMLElement | null = null;
 
-export async function mount(container, props = {}) {
+export async function mount(
+  container: HTMLElement,
+  props: Record<string, unknown> = {},
+) {
   await unmount();
 
   mountNode = document.createElement("products-angular-root");
@@ -16,7 +20,7 @@ export async function mount(container, props = {}) {
 
   try {
     appRef = await createApplication({
-      providers: [{ provide: RUNTIME_PROPS, useValue: props }]
+      providers: [{ provide: RUNTIME_PROPS, useValue: props }],
     });
 
     appRef.bootstrap(ProductsShellComponent, mountNode);

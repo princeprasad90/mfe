@@ -1,1 +1,1 @@
-export { mount, unmount } from "./mfe-entry.js";
+export { mount, unmount } from "./mfe-entry";

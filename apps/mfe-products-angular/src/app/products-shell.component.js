@@ -1,5 +1,6 @@
 import { Component, inject, ChangeDetectorRef } from "@angular/core";
 import { RUNTIME_PROPS } from "./runtime-props.js";
+import { productsMatcher } from "./routes.js";
 import ProductsListComponent from "./pages/list/products-list.component.js";
 import ProductDetailsComponent from "./pages/details/product-details.component.js";
 
@@ -21,8 +22,14 @@ class ProductsShellComponent {
     window.removeEventListener("popstate", this._popstateHandler);
   }
 
+  get route() {
+    const basePath = this.runtimeProps.basePath ?? "/products";
+    const relative = this.currentPath.replace(basePath, "") || "/";
+    return productsMatcher(relative);
+  }
+
   get isDetailsRoute() {
-    return /\/details\/\d+/.test(this.currentPath);
+    return this.route.name === "detail";
   }
 }
 

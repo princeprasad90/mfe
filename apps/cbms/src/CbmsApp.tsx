@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 import "./cbms.css";
-import { matchRoute } from "./routes";
+import { useMfeRouter } from "@mfe/platform-ui";
+import { cbmsRoutes } from "./routes";
 import PaymentsListPage from "./pages/list/PaymentsListPage";
 import PaymentDetailPage from "./pages/detail/PaymentDetailPage";
 import CreatePaymentPage from "./pages/create/CreatePaymentPage";
@@ -16,27 +17,16 @@ type Props = {
 };
 
 const CbmsApp = ({ basePath = "/cbms", emitEvent, onEvent }: Props) => {
-  const [, setTick] = useState(0);
-
-  // Re-render on every navigation so route matching picks up new URL
-  useEffect(() => {
-    const handler = () => setTick((n) => n + 1);
-    window.addEventListener("popstate", handler);
-    return () => window.removeEventListener("popstate", handler);
-  }, []);
-
-  const goTo = (path: string) => {
-    window.history.pushState({}, "", path);
-    window.dispatchEvent(new PopStateEvent("popstate"));
-  };
-
-  const route = matchRoute(window.location.pathname, window.location.search);
+  const { route, navigate } = useMfeRouter({
+    basePath,
+    routes: cbmsRoutes,
+  });
 
   if (route.name === "demo") {
     return (
       <FormBuilderDemoPage
         basePath={basePath ?? "/cbms"}
-        goTo={goTo}
+        goTo={navigate}
       />
     );
   }
@@ -45,7 +35,7 @@ const CbmsApp = ({ basePath = "/cbms", emitEvent, onEvent }: Props) => {
     return (
       <CreatePaymentPage
         basePath={basePath ?? "/cbms"}
-        goTo={goTo}
+        goTo={navigate}
         emitEvent={emitEvent}
       />
     );
@@ -55,9 +45,9 @@ const CbmsApp = ({ basePath = "/cbms", emitEvent, onEvent }: Props) => {
     return (
       <PaymentDetailPage
         basePath={basePath ?? "/cbms"}
-        paymentId={route.paymentId}
-        currentPage={route.page}
-        goTo={goTo}
+        paymentId={(route.params.id as number) || 0}
+        currentPage={Math.max(1, (route.query.page as number) || 1)}
+        goTo={navigate}
         emitEvent={emitEvent}
       />
     );
@@ -66,8 +56,8 @@ const CbmsApp = ({ basePath = "/cbms", emitEvent, onEvent }: Props) => {
   return (
     <PaymentsListPage
       basePath={basePath ?? "/cbms"}
-      currentPage={route.page}
-      goTo={goTo}
+      currentPage={Math.max(1, (route.query.page as number) || 1)}
+      goTo={navigate}
       onEvent={onEvent}
     />
   );

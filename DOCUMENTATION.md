@@ -1,6 +1,6 @@
 # Micro-Frontend (MFE) Platform - Complete Technical Documentation
 
-**Last Updated:** March 4, 2026
+**Last Updated:** July 2025
 
 ---
 
@@ -32,6 +32,11 @@
 24. [Validation Utilities Reference](#24-validation-utilities-reference)
 25. [FormBuilder API Reference](#25-formbuilder-api-reference)
 26. [Migration Guide: Manual Forms → FormBuilder](#26-migration-guide-manual-forms--formbuilder)
+27. [Route Matcher & MFE Router](#27-route-matcher--mfe-router)
+28. [Data Fetching Hooks](#28-data-fetching-hooks)
+29. [MFE Bootstrap Factory](#29-mfe-bootstrap-factory)
+30. [Layout & Data-Display Components](#30-layout--data-display-components)
+31. [Developer Utilities Migration Guide](#31-developer-utilities-migration-guide)
 
 ---
 
@@ -3690,6 +3695,657 @@ A comprehensive demo page is available at the CBMS `/demo` route, accessible via
 
 ---
 
+# 27. Route Matcher & MFE Router
+
+## 27.1 Problem Statement
+
+Every MFE that supports multiple views duplicates the same boilerplate:
+
+```tsx
+// ❌  Before: manual if/else chains in routes/index.ts
+export function matchRoute(path: string): CbmsRoute {
+  if (path.includes("/demo")) return "demo";
+  if (path.includes("/create")) return "create";
+  const match = path.match(/\/details\/(\d+)/);
+  if (match) return { page: "detail", id: Number(match[1]) };
+  return "list";
+}
+```
+
+Each MFE also duplicates a `useState` + `useEffect` + `popstate` listener pattern in its root `App` component.
+
+## 27.2 `createRouteMatcher` (platform-utils)
+
+A **framework-agnostic** declarative route table that compiles patterns once and matches in O(n) where n is the number of routes.
+
+### Route Definition
+
+```ts
+import { createRouteMatcher, type RouteDef } from "@mfe/platform-utils";
+
+type MyRoutes = "home" | "detail" | "create";
+
+const routes: RouteDef<MyRoutes>[] = [
+  { pattern: "/create", name: "create" },
+  { pattern: "/details/:id", name: "detail", params: { id: "number" } },
+  { pattern: "/", name: "home" }, // fallback (last wins)
+];
+
+const matcher = createRouteMatcher(routes);
+```
+
+### Matching
+
+```ts
+const result = matcher.match("/details/42?page=3");
+// → { name: "detail", params: { id: 42 }, query: { page: "3" } }
+```
+
+### Reverse Routing
+
+```ts
+matcher.buildPath("detail", { id: 42 }, { page: "3" });
+// → "/details/42?page=3"
+```
+
+### `RouteDef<N>` Type
+
+| Property  | Type                        | Description                            |
+| --------- | --------------------------- | -------------------------------------- |
+| `pattern` | `string`                    | URL pattern with `:param` placeholders |
+| `name`    | `N`                         | Route identifier                       |
+| `params`  | `Record<string, ParamType>` | Optional — cast params to type         |
+| `query`   | `Record<string, ParamType>` | Optional — cast query params to type   |
+
+`ParamType` = `"string" | "number" | "boolean"`.
+
+### `MatchedRoute<N>` Type
+
+| Property | Type                      | Description                |
+| -------- | ------------------------- | -------------------------- |
+| `name`   | `N`                       | Matched route name         |
+| `params` | `Record<string, unknown>` | Extracted path parameters  |
+| `query`  | `Record<string, unknown>` | Extracted query parameters |
+
+## 27.3 `useMfeRouter` (platform-ui)
+
+A React hook that combines `createRouteMatcher` with browser history management, eliminating all `useState`/`useEffect`/`popstate` boilerplate from MFE root components.
+
+### Usage
+
+```tsx
+import { useMfeRouter } from "@mfe/platform-ui";
+
+function CbmsApp({ basePath }: { basePath: string }) {
+  const { route, navigate, buildPath, pathname } = useMfeRouter({
+    basePath,
+    routes: cbmsRoutes,
+  });
+
+  switch (route.name) {
+    case "detail":
+      return <DetailPage id={route.params.id as number} goTo={navigate} />;
+    case "create":
+      return <CreatePage goTo={navigate} />;
+    default:
+      return <ListPage goTo={navigate} />;
+  }
+}
+```
+
+### `UseMfeRouterOptions`
+
+| Property   | Type            | Description                                |
+| ---------- | --------------- | ------------------------------------------ |
+| `basePath` | `string`        | MFE's mount path (e.g. `/cbms`)            |
+| `routes`   | `RouteDef<N>[]` | Route table (same as `createRouteMatcher`) |
+
+### `UseMfeRouterReturn<N>`
+
+| Property    | Type                                | Description                             |
+| ----------- | ----------------------------------- | --------------------------------------- |
+| `route`     | `MatchedRoute<N>`                   | Current matched route with params/query |
+| `navigate`  | `(path: string) => void`            | Push new URL and re-render              |
+| `goBack`    | `() => void`                        | `history.back()`                        |
+| `buildPath` | `(name, params?, query?) => string` | Reverse routing (prepends basePath)     |
+| `pathname`  | `string`                            | Current `location.pathname`             |
+| `search`    | `string`                            | Current `location.search`               |
+| `basePath`  | `string`                            | Echo of the basePath option             |
+
+---
+
+# 28. Data Fetching Hooks
+
+## 28.1 Problem Statement
+
+Every MFE page that loads data duplicates:
+
+```tsx
+// ❌  Before: copy-paste in every page
+const [data, setData] = useState<T | null>(null);
+const [loading, setLoading] = useState(true);
+const [error, setError] = useState<Error | null>(null);
+
+useEffect(() => {
+  setLoading(true);
+  fetchData()
+    .then(setData)
+    .catch(setError)
+    .finally(() => setLoading(false));
+}, [dep]);
+```
+
+## 28.2 `useApi<T>` Hook
+
+A generic React hook for declarative data fetching with caching, retry, and transform support.
+
+### Basic Usage
+
+```tsx
+import { useApi } from "@mfe/platform-ui";
+
+function PaymentList() {
+  const { data, loading, error, refetch } = useApi<Payment[]>("/api/payments");
+
+  if (loading) return <Spinner />;
+  if (error) return <ErrorBanner error={error} onRetry={refetch} />;
+  return <Table data={data!} />;
+}
+```
+
+### With Custom Fetcher
+
+```tsx
+const { data } = useApi<Payment>({
+  fetcher: () => getPaymentById(id),
+  deps: [id],
+  cacheKey: `payment-${id}`,
+  cacheTtl: 30_000,
+});
+```
+
+### `UseApiOptions<T>`
+
+| Option       | Type                   | Default  | Description                             |
+| ------------ | ---------------------- | -------- | --------------------------------------- |
+| `immediate`  | `boolean`              | `true`   | Fetch on mount                          |
+| `cacheKey`   | `string`               | —        | Enable in-memory cache with this key    |
+| `cacheTtl`   | `number`               | `60_000` | Cache time-to-live in ms                |
+| `retry`      | `number`               | `0`      | Number of retry attempts                |
+| `retryDelay` | `number`               | `1_000`  | Delay between retries in ms             |
+| `transform`  | `(raw: any) => T`      | —        | Transform response before setting state |
+| `onSuccess`  | `(data: T) => void`    | —        | Callback on successful fetch            |
+| `onError`    | `(err: Error) => void` | —        | Callback on failed fetch                |
+
+### `UseApiReturn<T>`
+
+| Property  | Type                  | Description             |
+| --------- | --------------------- | ----------------------- |
+| `data`    | `T \| null`           | Fetched data            |
+| `loading` | `boolean`             | Currently fetching      |
+| `error`   | `Error \| null`       | Last error              |
+| `refetch` | `() => Promise<void>` | Re-execute the fetch    |
+| `mutate`  | `(data: T) => void`   | Optimistically set data |
+
+## 28.3 `useApiMutation<T, P>` Hook
+
+A hook for write operations (POST, PUT, DELETE) with confirmation and callbacks.
+
+### Usage
+
+```tsx
+import { useApiMutation } from "@mfe/platform-ui";
+
+const { execute, loading } = useApiMutation<void, number>({
+  fn: (paymentId) => api.post(`/payments/${paymentId}/approve`),
+  confirm: "Approve this payment?",
+  onSuccess: () => refetchList(),
+});
+
+<button onClick={() => execute(payment.id)} disabled={loading}>
+  Approve
+</button>;
+```
+
+### `UseApiMutationOptions<T, P>`
+
+| Option      | Type                        | Description                                       |
+| ----------- | --------------------------- | ------------------------------------------------- |
+| `fn`        | `(params: P) => Promise<T>` | The mutation function                             |
+| `confirm`   | `string`                    | Optional — show `window.confirm` before executing |
+| `onSuccess` | `(data: T) => void`         | Callback after success                            |
+| `onError`   | `(err: Error) => void`      | Callback after failure                            |
+
+### Cache Helpers
+
+```ts
+import { clearApiCache } from "@mfe/platform-ui";
+clearApiCache(); // clear all
+clearApiCache("payment-*"); // clear matching keys (glob-style not supported — exact match)
+```
+
+---
+
+# 29. MFE Bootstrap Factory
+
+## 29.1 Problem Statement
+
+Every MFE duplicates 15–25 lines of identical bootstrap code:
+
+```tsx
+// ❌  Before: copy-paste in every bootstrap.ts
+import React from "react";
+import ReactDOM from "react-dom/client";
+import CbmsApp from "./CbmsApp";
+
+type MountProps = { basePath?: string };
+let root: ReactDOM.Root | null = null;
+
+export function mount(container: HTMLElement, props: MountProps = {}) {
+  container.setAttribute("data-mfe", "cbms");
+  root = ReactDOM.createRoot(container);
+  root.render(<CbmsApp basePath={props.basePath ?? "/cbms"} />);
+}
+
+export function unmount() {
+  if (root) {
+    root.unmount();
+    root = null;
+  }
+}
+```
+
+## 29.2 `createMfeApp` Factory
+
+A single factory function that generates `mount`/`unmount` with built-in error boundary, provider wrapping, and lifecycle hooks.
+
+### Usage
+
+```ts
+// ✅  After: 3 lines in bootstrap.ts
+import { createMfeApp } from "@mfe/platform-ui";
+import CbmsApp from "./CbmsApp";
+
+export const { mount, unmount } = createMfeApp({
+  name: "cbms",
+  App: CbmsApp,
+});
+```
+
+### `CreateMfeAppOptions`
+
+| Option          | Type                                                   | Description                               |
+| --------------- | ------------------------------------------------------ | ----------------------------------------- |
+| `name`          | `string`                                               | Sets `data-mfe` attribute for CSS scoping |
+| `App`           | `React.ComponentType<any>`                             | Root component                            |
+| `errorFallback` | `(error: Error, retry: () => void) => React.ReactNode` | Custom error boundary UI                  |
+| `providers`     | `React.ComponentType<{ children: React.ReactNode }>[]` | Wrapping providers (outermost first)      |
+| `onMount`       | `(props: Record<string, unknown>) => void`             | Lifecycle hook — called after mount       |
+| `onUnmount`     | `() => void`                                           | Lifecycle hook — called before unmount    |
+
+### `MfeBootstrap` Return Type
+
+```ts
+interface MfeBootstrap {
+  mount(container: HTMLElement, props?: Record<string, unknown>): void;
+  unmount(): void;
+}
+```
+
+### Provider Wrapping Example
+
+```ts
+export const { mount, unmount } = createMfeApp({
+  name: "cbms",
+  App: CbmsApp,
+  providers: [ThemeProvider, AuthProvider], // ThemeProvider wraps AuthProvider wraps App
+  onMount: (props) => console.log("CBMS mounted with", props),
+});
+```
+
+### Built-in Error Boundary
+
+`createMfeApp` wraps every MFE in `MfeAppErrorBoundary`:
+
+- Catches all render errors
+- Shows a styled fallback with error message and retry button
+- Logs `[mfeName] Error Boundary:` to console
+- Supports custom fallback via `errorFallback` option
+
+---
+
+# 30. Layout & Data-Display Components
+
+## 30.1 Overview
+
+Three config-driven components that eliminate repetitive page structure code:
+
+| Component      | Purpose                                                                   | Package            |
+| -------------- | ------------------------------------------------------------------------- | ------------------ |
+| `PageLayout`   | Page wrapper with title, breadcrumbs, toolbar, loading/error/empty states | `@mfe/platform-ui` |
+| `TableBuilder` | Data table with sorting, filtering, search, pagination, row actions       | `@mfe/platform-ui` |
+| `DetailView`   | Detail page with field grid, formatters, action buttons                   | `@mfe/platform-ui` |
+
+## 30.2 `PageLayout`
+
+### Usage
+
+```tsx
+import { PageLayout } from "@mfe/platform-ui";
+
+<PageLayout
+  title="Payments"
+  breadcrumbs={[{ label: "CBMS", path: "/cbms" }, { label: "Payments" }]}
+  toolbar={<button onClick={handleCreate}>+ New Payment</button>}
+  loading={isLoading}
+  error={error}
+  onRetry={refetch}
+  navigate={goTo}
+>
+  {children}
+</PageLayout>;
+```
+
+### Props
+
+| Prop           | Type                                 | Description                          |
+| -------------- | ------------------------------------ | ------------------------------------ |
+| `title`        | `string`                             | Page heading                         |
+| `subtitle`     | `string`                             | Optional subtitle below title        |
+| `breadcrumbs`  | `{ label: string; path?: string }[]` | Breadcrumb trail                     |
+| `toolbar`      | `React.ReactNode`                    | Actions area (top-right)             |
+| `loading`      | `boolean`                            | Show spinner overlay                 |
+| `error`        | `Error \| null`                      | Show error state with retry          |
+| `empty`        | `boolean`                            | Show empty state                     |
+| `emptyIcon`    | `string`                             | Icon for empty state (default: `📭`) |
+| `emptyMessage` | `string`                             | Message for empty state              |
+| `onRetry`      | `() => void`                         | Retry button handler                 |
+| `navigate`     | `(path: string) => void`             | Navigation function for breadcrumbs  |
+| `children`     | `React.ReactNode`                    | Page content                         |
+
+## 30.3 `TableBuilder<T>`
+
+A generic, config-driven table component that handles sorting, filtering, search, pagination, and row actions with zero boilerplate.
+
+### Usage
+
+```tsx
+import { TableBuilder, type TableColumn } from "@mfe/platform-ui";
+
+const columns: TableColumn<Payment>[] = [
+  { key: "id", label: "ID", sortable: true },
+  { key: "customer", label: "Customer", sortable: true, filterable: true },
+  { key: "amount", label: "Amount", format: "currency", sortable: true },
+  {
+    key: "status",
+    label: "Status",
+    filterable: true,
+    filterType: "select",
+    filterOptions: ["Pending", "Approved", "Rejected"],
+    render: (v) => <StatusBadge status={v} />,
+  },
+];
+
+<TableBuilder
+  columns={columns}
+  data={payments}
+  rowKey="id"
+  searchable
+  pageSize={10}
+  defaultSort={{ key: "id", dir: "asc" }}
+  rowActions={[
+    { label: "View", onClick: (row) => goTo(`/details/${row.id}`) },
+    {
+      label: "Delete",
+      variant: "danger",
+      confirm: "Delete?",
+      onClick: handleDelete,
+    },
+  ]}
+/>;
+```
+
+### `TableColumn<T>` Type
+
+| Property        | Type                                                                       | Description                           |
+| --------------- | -------------------------------------------------------------------------- | ------------------------------------- |
+| `key`           | `keyof T & string`                                                         | Field to display                      |
+| `label`         | `string`                                                                   | Column header                         |
+| `sortable`      | `boolean`                                                                  | Enable sorting                        |
+| `filterable`    | `boolean`                                                                  | Show filter input                     |
+| `filterType`    | `"text" \| "select"`                                                       | Filter control type (default: `text`) |
+| `filterOptions` | `string[]`                                                                 | Options for select filter             |
+| `format`        | `"currency" \| "date" \| "dateTime" \| "number" \| "percent" \| "boolean"` | Auto-format                           |
+| `render`        | `(value: any, row: T) => React.ReactNode`                                  | Custom cell renderer                  |
+| `width`         | `string`                                                                   | Column width (CSS)                    |
+| `align`         | `"left" \| "center" \| "right"`                                            | Text alignment                        |
+
+### `RowAction<T>` Type
+
+| Property  | Type                                 | Description                  |
+| --------- | ------------------------------------ | ---------------------------- |
+| `label`   | `string`                             | Button text                  |
+| `icon`    | `string`                             | Optional icon/emoji          |
+| `variant` | `"primary" \| "danger" \| "success"` | Button color variant         |
+| `confirm` | `string`                             | Optional confirmation prompt |
+| `onClick` | `(row: T) => void`                   | Click handler                |
+| `visible` | `(row: T) => boolean`                | Conditionally show button    |
+
+### Table Props
+
+| Prop          | Type               | Default | Description            |
+| ------------- | ------------------ | ------- | ---------------------- |
+| `columns`     | `TableColumn<T>[]` | —       | Column definitions     |
+| `data`        | `T[]`              | —       | Data array             |
+| `rowKey`      | `keyof T & string` | —       | Unique key for rows    |
+| `searchable`  | `boolean`          | `false` | Show search bar        |
+| `pageSize`    | `number`           | `10`    | Rows per page          |
+| `defaultSort` | `{ key, dir }`     | —       | Initial sort           |
+| `rowActions`  | `RowAction<T>[]`   | —       | Action buttons per row |
+| `onRowClick`  | `(row: T) => void` | —       | Click handler for row  |
+| `toolbar`     | `React.ReactNode`  | —       | Extra toolbar content  |
+| `loading`     | `boolean`          | `false` | Show loading state     |
+| `striped`     | `boolean`          | `true`  | Alternate row colors   |
+
+## 30.4 `DetailView<T>`
+
+A config-driven detail view that renders a labeled field grid with formatting, actions, and built-in loading/error/not-found states.
+
+### Usage
+
+```tsx
+import {
+  DetailView,
+  type DetailField,
+  type DetailAction,
+} from "@mfe/platform-ui";
+
+const fields: DetailField<Payment>[] = [
+  { key: "id", label: "Payment ID" },
+  { key: "customer", label: "Customer" },
+  { key: "amount", label: "Amount", format: "currency" },
+  { key: "status", label: "Status", render: (v) => <StatusBadge status={v} /> },
+];
+
+const actions: DetailAction<Payment>[] = [
+  { label: "Approve", variant: "success", onClick: (row) => approve(row.id) },
+  {
+    label: "Delete",
+    variant: "danger",
+    confirm: "Delete?",
+    onClick: (row) => remove(row.id),
+  },
+];
+
+<DetailView
+  data={payment}
+  fields={fields}
+  actions={actions}
+  columns={2}
+  backLink={{ label: "← Back to Payments", path: "/cbms" }}
+  navigate={goTo}
+/>;
+```
+
+### `DetailField<T>` Type
+
+| Property  | Type                                                                       | Description              |
+| --------- | -------------------------------------------------------------------------- | ------------------------ |
+| `key`     | `keyof T & string`                                                         | Field to display         |
+| `label`   | `string`                                                                   | Label text               |
+| `format`  | `"currency" \| "date" \| "dateTime" \| "number" \| "percent" \| "boolean"` | Auto-format              |
+| `render`  | `(value: any, data: T) => React.ReactNode`                                 | Custom renderer          |
+| `visible` | `boolean \| ((data: T) => boolean)`                                        | Conditionally show field |
+| `span`    | `number`                                                                   | Grid column span         |
+
+### `DetailAction<T>` Type
+
+| Property  | Type                                 | Description                  |
+| --------- | ------------------------------------ | ---------------------------- |
+| `label`   | `string`                             | Button text                  |
+| `variant` | `"primary" \| "danger" \| "success"` | Button color                 |
+| `confirm` | `string`                             | Optional confirmation prompt |
+| `onClick` | `(data: T) => void`                  | Click handler                |
+| `visible` | `boolean \| ((data: T) => boolean)`  | Conditionally show button    |
+| `loading` | `boolean`                            | Show loading state on button |
+
+---
+
+# 31. Developer Utilities Migration Guide
+
+## 31.1 Route Matching: Before → After
+
+**Before** (`routes/index.ts` — 25+ lines):
+
+```ts
+export type CbmsRoute =
+  | "list"
+  | "create"
+  | "demo"
+  | { page: "detail"; id: number };
+
+export function matchRoute(path: string): CbmsRoute {
+  if (path.includes("/demo")) return "demo";
+  if (path.includes("/create")) return "create";
+  const m = path.match(/\/details\/(\d+)/);
+  if (m) return { page: "detail", id: Number(m[1]) };
+  return "list";
+}
+```
+
+**After** (`routes/index.ts` — declarative):
+
+```ts
+import { createRouteMatcher, type RouteDef } from "@mfe/platform-utils";
+
+type CbmsRouteName = "demo" | "create" | "detail" | "list";
+
+const cbmsRoutes: RouteDef<CbmsRouteName>[] = [
+  { pattern: "/demo", name: "demo" },
+  { pattern: "/create", name: "create" },
+  { pattern: "/details/:id", name: "detail", params: { id: "number" } },
+  { pattern: "/", name: "list" },
+];
+
+export const cbmsMatcher = createRouteMatcher(cbmsRoutes);
+```
+
+## 31.2 MFE Root Component: Before → After
+
+**Before** (`CbmsApp.tsx` — 30+ lines with useState/useEffect/popstate):
+
+```tsx
+function CbmsApp({ basePath = "/cbms" }) {
+  const [, setTick] = useState(0);
+  useEffect(() => {
+    const onPop = () => setTick((t) => t + 1);
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
+
+  const goTo = (path: string) => {
+    window.history.pushState({}, "", path);
+    setTick((t) => t + 1);
+  };
+
+  const route = matchRoute(location.pathname.replace(basePath, ""));
+  // ... switch on route
+}
+```
+
+**After** (`CbmsApp.tsx` — clean):
+
+```tsx
+function CbmsApp({ basePath = "/cbms" }) {
+  const { route, navigate } = useMfeRouter({ basePath, routes: cbmsRoutes });
+
+  switch (route.name) {
+    case "detail":
+      return <DetailPage id={route.params.id as number} goTo={navigate} />;
+    // ...
+  }
+}
+```
+
+## 31.3 Bootstrap: Before → After
+
+**Before** (`bootstrap.ts` — 15–25 lines):
+
+```ts
+import React from "react"; import ReactDOM from "react-dom/client";
+let root: ReactDOM.Root | null = null;
+export function mount(el, props) { ... }
+export function unmount() { ... }
+```
+
+**After** (`bootstrap.ts` — 3 lines):
+
+```ts
+import { createMfeApp } from "@mfe/platform-ui";
+import CbmsApp from "./CbmsApp";
+export const { mount, unmount } = createMfeApp({ name: "cbms", App: CbmsApp });
+```
+
+## 31.4 List Page: Before → After
+
+**Before**: Manual `<ul>` / `<table>` with inline pagination, sort buttons, filter inputs.
+
+**After**: `<PageLayout>` + `<TableBuilder>` with column config:
+
+```tsx
+<PageLayout title="Payments" breadcrumbs={[...]} toolbar={...} navigate={goTo}>
+  <TableBuilder columns={columns} data={data} rowKey="id" searchable pageSize={10} />
+</PageLayout>
+```
+
+## 31.5 Detail Page: Before → After
+
+**Before**: Manual `<p><strong>Label:</strong> value</p>` repeating for each field.
+
+**After**: `<PageLayout>` + `<DetailView>` with field config:
+
+```tsx
+<PageLayout title="Payment Details" breadcrumbs={[...]} navigate={goTo}>
+  <DetailView data={payment} fields={fields} actions={actions} columns={2}
+    backLink={{ label: "← Back", path: "/cbms" }} navigate={goTo} />
+</PageLayout>
+```
+
+## 31.6 Migration Checklist
+
+| Step | File(s)                     | Utility                       | Lines Saved |
+| ---- | --------------------------- | ----------------------------- | ----------- |
+| 1    | `routes/index.ts`           | `createRouteMatcher`          | ~15         |
+| 2    | `bootstrap.ts`              | `createMfeApp`                | ~15         |
+| 3    | `*App.tsx`                  | `useMfeRouter`                | ~20         |
+| 4    | List pages                  | `PageLayout` + `TableBuilder` | ~50+        |
+| 5    | Detail pages                | `PageLayout` + `DetailView`   | ~30+        |
+| 6    | Any data-fetching component | `useApi` / `useApiMutation`   | ~10 each    |
+
+**Estimated total**: 100–150 lines eliminated per MFE, replaced with declarative config.
+
+---
+
 # Appendix A: Glossary
 
 | Term                     | Definition                                                           |
@@ -3714,8 +4370,9 @@ A comprehensive demo page is available at the CBMS `/demo` route, accessible via
 | 0.1.0   | Initial    | Vite-only federation architecture                                                                                                                                                            |
 | 0.2.0   | March 2026 | Added BFF with auth flow, dynamic shell configuration                                                                                                                                        |
 | 0.3.0   | July 2025  | Form Builder system: `defineFormSchema`, `useFormBuilder`, `<FormBuilder>`, `<FormField>`, `<Checkbox>`, `<TextArea>`, async/cross-field validation, submit pipeline, conditional visibility |
+| 0.4.0   | July 2025  | Developer utilities: `createRouteMatcher`, `useMfeRouter`, `useApi`/`useApiMutation`, `createMfeApp`, `PageLayout`, `TableBuilder`, `DetailView`; CBMS refactored to showcase all utilities  |
 
 ---
 
 _Document generated: July 2025_
-_Platform Version: 0.3.0_
+_Platform Version: 0.4.0_

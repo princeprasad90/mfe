@@ -1,24 +1,9 @@
 import { Component, inject } from "@angular/core";
-import { products } from "../../data/products.js";
-import { RUNTIME_PROPS } from "../../runtime-props.js";
-import { productsPath } from "../../routes.js";
+import { products, type Product } from "../../data/products";
+import { RUNTIME_PROPS, type RuntimeProps } from "../../runtime-props";
+import { productsPath } from "../../routes";
 
-class ProductsListComponent {
-  runtimeProps = inject(RUNTIME_PROPS, { optional: true }) ?? {};
-  products = products;
-  basePath = this.runtimeProps.basePath ?? "/products";
-
-  goTo(path) {
-    window.history.pushState({}, "", path);
-    window.dispatchEvent(new PopStateEvent("popstate"));
-  }
-
-  openDetails(id) {
-    this.goTo(this.basePath + productsPath.detail(id));
-  }
-}
-
-Component({
+@Component({
   selector: "products-list-page",
   standalone: true,
   imports: [],
@@ -31,28 +16,36 @@ Component({
             <strong>{{ products[0].name }}</strong>
             <p>{{ products[0].description }}</p>
           </div>
-          <button class="mfe__ghost" (click)="openDetails(products[0].id)">Details</button>
+          <button class="mfe__ghost" (click)="openDetails(products[0].id)">
+            Details
+          </button>
         </li>
         <li class="mfe__list-item">
           <div>
             <strong>{{ products[1].name }}</strong>
             <p>{{ products[1].description }}</p>
           </div>
-          <button class="mfe__ghost" (click)="openDetails(products[1].id)">Details</button>
+          <button class="mfe__ghost" (click)="openDetails(products[1].id)">
+            Details
+          </button>
         </li>
         <li class="mfe__list-item">
           <div>
             <strong>{{ products[2].name }}</strong>
             <p>{{ products[2].description }}</p>
           </div>
-          <button class="mfe__ghost" (click)="openDetails(products[2].id)">Details</button>
+          <button class="mfe__ghost" (click)="openDetails(products[2].id)">
+            Details
+          </button>
         </li>
         <li class="mfe__list-item">
           <div>
             <strong>{{ products[3].name }}</strong>
             <p>{{ products[3].description }}</p>
           </div>
-          <button class="mfe__ghost" (click)="openDetails(products[3].id)">Details</button>
+          <button class="mfe__ghost" (click)="openDetails(products[3].id)">
+            Details
+          </button>
         </li>
       </ul>
     </section>
@@ -95,8 +88,21 @@ Component({
         padding: 6px 10px;
         cursor: pointer;
       }
-    `
-  ]
-})(ProductsListComponent);
+    `,
+  ],
+})
+export default class ProductsListComponent {
+  private runtimeProps: RuntimeProps =
+    inject(RUNTIME_PROPS, { optional: true }) ?? {};
+  products: Product[] = products;
+  basePath = this.runtimeProps.basePath ?? "/products";
 
-export default ProductsListComponent;
+  goTo(path: string) {
+    window.history.pushState({}, "", path);
+    window.dispatchEvent(new PopStateEvent("popstate"));
+  }
+
+  openDetails(id: number) {
+    this.goTo(this.basePath + productsPath.detail(id));
+  }
+}

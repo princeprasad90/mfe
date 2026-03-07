@@ -23,6 +23,8 @@ const allPayments: Payment[] = Array.from({ length: 23 }, (_, i) => ({
 
 export const getTotalPages = () => Math.ceil(allPayments.length / PAGE_SIZE);
 
+export const getAllPayments = (): Payment[] => [...allPayments];
+
 export const getPaymentsPage = (page: number): Payment[] => {
   const start = (page - 1) * PAGE_SIZE;
   return allPayments.slice(start, start + PAGE_SIZE);

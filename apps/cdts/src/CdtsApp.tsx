@@ -1,5 +1,7 @@
-import React, { useMemo, useState, useEffect } from "react";
+import React, { useMemo } from "react";
 import "./cdts.css";
+import { useMfeRouter } from "@mfe/platform-ui";
+import { cdtsRoutes, cdtsPath } from "./routes";
 
 type Props = {
   routePath?: string;
@@ -23,34 +25,21 @@ const CdtsApp = ({
   basePath = "/tasks",
   emitEvent,
 }: Props) => {
-  const [currentUrl, setCurrentUrl] = useState(`${window.location.pathname}${window.location.search}`);
+  const { route, navigate } = useMfeRouter({
+    basePath,
+    routes: cdtsRoutes,
+  });
 
-  useEffect(() => {
-    const handlePopstate = () => {
-      setCurrentUrl(`${window.location.pathname}${window.location.search}`);
-    };
-    window.addEventListener("popstate", handlePopstate);
-    return () => window.removeEventListener("popstate", handlePopstate);
-  }, []);
-
-  const routePath = currentUrl;
-  const detailMatch = routePath.match(/\/details\/(\d+)/);
-  const detailId = detailMatch ? Number(detailMatch[1]) : null;
+  const detailId = route.name === "detail" ? (route.params.id as number) || null : null;
   const detailTask = tasks.find((item) => item.id === detailId);
 
-  const pageMatch = routePath.match(/[?&]page=(\d+)/);
-  const currentPage = Math.max(1, Number(pageMatch?.[1] || 1));
+  const currentPage = Math.max(1, (route.query.page as number) || 1);
   const totalPages = Math.ceil(tasks.length / PAGE_SIZE);
 
   const pagedItems = useMemo(() => {
     const start = (currentPage - 1) * PAGE_SIZE;
     return tasks.slice(start, start + PAGE_SIZE);
   }, [currentPage]);
-
-  const goTo = (path: string) => {
-    window.history.pushState({}, "", path);
-    window.dispatchEvent(new PopStateEvent("popstate"));
-  };
 
   // ─── Assign task to a CBMS customer ─────────────────────────────────────
   // Emits "cdts:task:assigned" so the CBMS payments list can highlight the customer.
@@ -92,7 +81,7 @@ const CdtsApp = ({
           </p>
         </div>
 
-        <button className="button" onClick={() => goTo(`${basePath}?page=${currentPage}`)}>Back to Listing</button>
+        <button className="button" onClick={() => navigate(cdtsPath.list(currentPage))}>Back to Listing</button>
       </div>
     );
   }
@@ -104,14 +93,14 @@ const CdtsApp = ({
         {pagedItems.map((task) => (
           <li key={task.id} className="list-item">
             <span>{task.title}</span>
-            <button className="ghost" onClick={() => goTo(`${basePath}/details/${task.id}?page=${currentPage}`)}>Details</button>
+            <button className="ghost" onClick={() => navigate(cdtsPath.detail(task.id, currentPage))}>Details</button>
           </li>
         ))}
       </ul>
       <div className="pager">
-        <button className="ghost" disabled={currentPage <= 1} onClick={() => goTo(`${basePath}?page=${currentPage - 1}`)}>Previous</button>
+        <button className="ghost" disabled={currentPage <= 1} onClick={() => navigate(cdtsPath.list(currentPage - 1))}>Previous</button>
         <span>Page {currentPage} of {totalPages}</span>
-        <button className="ghost" disabled={currentPage >= totalPages} onClick={() => goTo(`${basePath}?page=${currentPage + 1}`)}>Next</button>
+        <button className="ghost" disabled={currentPage >= totalPages} onClick={() => navigate(cdtsPath.list(currentPage + 1))}>Next</button>
       </div>
     </div>
   );

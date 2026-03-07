@@ -1,6 +1,7 @@
 import { Component, inject, ChangeDetectorRef } from "@angular/core";
 import { products } from "../../data/products.js";
 import { RUNTIME_PROPS } from "../../runtime-props.js";
+import { productsMatcher, productsPath } from "../../routes.js";
 
 class ProductDetailsComponent {
   runtimeProps = inject(RUNTIME_PROPS, { optional: true }) ?? {};
@@ -22,15 +23,23 @@ class ProductDetailsComponent {
     window.removeEventListener("popstate", this._popstateHandler);
   }
 
+  get route() {
+    const relative = this.currentPath.replace(this.basePath, "") || "/";
+    return productsMatcher(relative);
+  }
+
   get selectedProduct() {
-    const detailMatch = this.currentPath.match(/\/details\/(\d+)/);
-    const detailId = detailMatch ? Number(detailMatch[1]) : null;
-    return this.products.find((item) => item.id === detailId) ?? null;
+    const id = this.route.params.id;
+    return this.products.find((item) => item.id === id) ?? null;
   }
 
   goTo(path) {
     window.history.pushState({}, "", path);
     window.dispatchEvent(new PopStateEvent("popstate"));
+  }
+
+  goBack() {
+    this.goTo(this.basePath + productsPath.list());
   }
 }
 
@@ -45,7 +54,7 @@ Component({
       <p [style.display]="selectedProduct ? 'block' : 'none'"><strong>Name:</strong> {{ selectedProduct?.name }}</p>
       <p [style.display]="selectedProduct ? 'block' : 'none'">{{ selectedProduct?.description }}</p>
       <p [style.display]="selectedProduct ? 'none' : 'block'">Product not found.</p>
-      <button class="mfe__button" (click)="goTo(basePath)">Back to list</button>
+      <button class="mfe__button" (click)="goBack()">Back to list</button>
     </section>
   `,
   styles: [

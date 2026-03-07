@@ -9,6 +9,7 @@
     "preview": "vite preview --port 3003"
   },
   "dependencies": {
+    "@mfe/platform-utils": "0.1.0",
     "@angular/common": "^17.3.0",
     "@angular/compiler": "^17.3.0",
     "@angular/core": "^17.3.0",

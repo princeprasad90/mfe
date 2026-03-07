@@ -1,0 +1,165 @@
+/* ── DetailView ─────────────────────────────────────────────────────────────── */
+
+.dv {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+/* Header */
+.dv__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.dv__title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* Field grid */
+.dv__grid {
+  display: grid;
+  gap: 16px 24px;
+}
+
+.dv__field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.dv__label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin: 0;
+}
+
+.dv__value {
+  font-size: 15px;
+  color: #1e293b;
+  margin: 0;
+  padding: 8px 0;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+/* Actions */
+.dv__actions {
+  display: flex;
+  gap: 10px;
+  padding-top: 8px;
+  border-top: 1px solid #e2e8f0;
+  flex-wrap: wrap;
+}
+
+.dv__action-btn {
+  padding: 8px 20px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  background: #fff;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.15s;
+}
+
+.dv__action-btn:hover {
+  background: #f1f5f9;
+}
+
+.dv__action-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.dv__action-btn--primary {
+  background: #3b82f6;
+  color: #fff;
+  border-color: #3b82f6;
+}
+
+.dv__action-btn--primary:hover {
+  background: #2563eb;
+}
+
+.dv__action-btn--danger {
+  background: #ef4444;
+  color: #fff;
+  border-color: #ef4444;
+}
+
+.dv__action-btn--danger:hover {
+  background: #dc2626;
+}
+
+.dv__action-btn--success {
+  background: #22c55e;
+  color: #fff;
+  border-color: #22c55e;
+}
+
+.dv__action-btn--success:hover {
+  background: #16a34a;
+}
+
+.dv__action-btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: #3b82f6;
+}
+
+.dv__action-btn--ghost:hover {
+  background: #eff6ff;
+}
+
+/* Loading / Error / Empty */
+.dv__loading,
+.dv__error,
+.dv__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  color: #64748b;
+}
+
+.dv__spinner {
+  width: 28px;
+  height: 28px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: dv-spin 0.7s linear infinite;
+  margin-bottom: 12px;
+}
+
+@keyframes dv-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.dv__retry-btn,
+.dv__back-btn {
+  margin-top: 12px;
+  padding: 8px 20px;
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.dv__retry-btn:hover,
+.dv__back-btn:hover {
+  background: #2563eb;
+}

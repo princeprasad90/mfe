@@ -80,3 +80,12 @@ export {
   xorDeobfuscate,
   constantTimeEqual,
 } from "./encryption-utils";
+
+// ── RouteMatcher ──────────────────────────────────────────────────────────────
+export { createRouteMatcher } from "./route-matcher";
+export type {
+  RouteDef,
+  MatchedRoute,
+  RouteMatcher,
+  ParamType,
+} from "./route-matcher";

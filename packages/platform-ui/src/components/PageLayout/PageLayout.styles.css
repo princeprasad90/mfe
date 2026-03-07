@@ -1,0 +1,128 @@
+/* ── PageLayout ─────────────────────────────────────────────────────────────── */
+
+.page-layout {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* Breadcrumbs */
+.page-layout__breadcrumbs {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.page-layout__breadcrumb-link {
+  color: #3b82f6;
+  text-decoration: none;
+  cursor: pointer;
+}
+
+.page-layout__breadcrumb-link:hover {
+  text-decoration: underline;
+}
+
+.page-layout__breadcrumb-sep {
+  color: #94a3b8;
+}
+
+.page-layout__breadcrumb-current {
+  color: #1e293b;
+  font-weight: 500;
+}
+
+/* Header */
+.page-layout__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+}
+
+.page-layout__title-group {
+  flex: 1;
+}
+
+.page-layout__title {
+  margin: 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.page-layout__subtitle {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 0.875rem;
+}
+
+.page-layout__toolbar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-shrink: 0;
+}
+
+/* Content */
+.page-layout__content {
+  min-height: 120px;
+}
+
+/* Loading */
+.page-layout__loading,
+.page-layout__error,
+.page-layout__empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  color: #64748b;
+}
+
+.page-layout__spinner {
+  width: 32px;
+  height: 32px;
+  border: 3px solid #e2e8f0;
+  border-top-color: #3b82f6;
+  border-radius: 50%;
+  animation: pl-spin 0.7s linear infinite;
+  margin-bottom: 12px;
+}
+
+@keyframes pl-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Error */
+.page-layout__error-icon {
+  font-size: 2rem;
+  margin-bottom: 8px;
+}
+
+.page-layout__retry-btn {
+  margin-top: 12px;
+  padding: 8px 20px;
+  background: #3b82f6;
+  color: #fff;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.page-layout__retry-btn:hover {
+  background: #2563eb;
+}
+
+/* Empty */
+.page-layout__empty-icon {
+  font-size: 2.5rem;
+  margin-bottom: 8px;
+}

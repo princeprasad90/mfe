@@ -27,6 +27,11 @@
 19. [Complete File Inventory](#19-complete-file-inventory)
 20. [Troubleshooting Guide](#20-troubleshooting-guide)
 21. [Backend for Frontend (BFF)](#21-backend-for-frontend-bff)
+22. [Platform Shared Packages](#22-platform-shared-packages)
+23. [Form Builder System](#23-form-builder-system)
+24. [Validation Utilities Reference](#24-validation-utilities-reference)
+25. [FormBuilder API Reference](#25-formbuilder-api-reference)
+26. [Migration Guide: Manual Forms → FormBuilder](#26-migration-guide-manual-forms--formbuilder)
 
 ---
 
@@ -2573,6 +2578,1118 @@ const fetchWithAuth = async <T>(url: string): Promise<T> => {
 
 ---
 
+# 22. Platform Shared Packages
+
+The platform provides several shared packages under the `packages/` directory. These are consumed by MFE apps via npm workspace dependencies (`@mfe/platform-*`).
+
+## 22.1 Package Dependency Graph
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        MFE Applications                              │
+│  ┌──────────┐    ┌──────────┐    ┌──────────┐    ┌──────────────┐  │
+│  │  Shell    │    │  CBMS    │    │  CDTS    │    │  Products    │  │
+│  └────┬─────┘    └────┬─────┘    └──────────┘    └──────────────┘  │
+│       │               │                                              │
+│       ▼               ▼                                              │
+│  ┌──────────────────────────────────────────────────────────┐       │
+│  │                  @mfe/platform-ui                         │       │
+│  │  Button, Input, Select, MultiSelect, SmartSelect,        │       │
+│  │  DatePicker, Table, Modal, Tabs, Toast, Loader, Form,    │       │
+│  │  Checkbox, TextArea, FormField, FormBuilder               │       │
+│  │  ── depends on: react-hook-form, @hookform/resolvers ──  │       │
+│  └────────────────────────┬─────────────────────────────────┘       │
+│                           │                                          │
+│  ┌────────────────────────▼─────────────────────────────────┐       │
+│  │                @mfe/platform-utils                        │       │
+│  │  DateUtils, ValidationUtils, StorageUtils, FormatUtils,   │       │
+│  │  EncryptionUtils, FormSchema (defineFormSchema + Zod)     │       │
+│  │  ── depends on: zod ──                                    │       │
+│  └──────────────────────────────────────────────────────────┘       │
+│                                                                      │
+│  ┌─────────────────────┐   ┌─────────────────────┐                  │
+│  │ @mfe/platform-events│   │@mfe/platform-contracts│                 │
+│  │  Event bus system    │   │  MountProps, types    │                 │
+│  └─────────────────────┘   └─────────────────────┘                  │
+│                                                                      │
+│  ┌─────────────────────┐   ┌─────────────────────┐                  │
+│  │ @mfe/platform-core  │   │ @mfe/build-tools     │                 │
+│  │  API, auth, config   │   │ PostCSS MFE scoping  │                 │
+│  └─────────────────────┘   └─────────────────────┘                  │
+└─────────────────────────────────────────────────────────────────────┘
+```
+
+## 22.2 @mfe/platform-utils
+
+**Location:** `packages/platform-utils/`
+**Dependencies:** `zod ^4.3.6`
+
+Reusable, framework-agnostic utility functions shared across all MFEs.
+
+### Modules
+
+| Module              | Exports                                                                                                                                    | Description                                        |
+| ------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------- |
+| **DateUtils**       | `formatDate`, `formatDateTime`, `toISODate`, `timeAgo`, `isValidDate`, `diffInDays`                                                        | Date formatting and comparison                     |
+| **ValidationUtils** | `required`, `isEmail`, `minLength`, `maxLength`, `matchesPattern`, `inRange`, `validate`, `isUrl`, `isPhone`                               | Standalone validators returning `ValidationResult` |
+| **StorageUtils**    | `storageGet`, `storageSet`, `storageRemove`, `storageClearByPrefix`, `storageHas`                                                          | Typed localStorage wrappers                        |
+| **FormatUtils**     | `formatNumber`, `formatCurrency`, `formatPercent`, `formatCompact`, `truncate`, `titleCase`, `slugify`, `mask`, `pluralise`, `formatBytes` | String/number formatting                           |
+| **EncryptionUtils** | `base64Encode`, `base64Decode`, `sha256`, `uuid`, `xorObfuscate`, `xorDeobfuscate`, `constantTimeEqual`                                    | Encoding, hashing, obfuscation                     |
+| **FormSchema**      | `defineFormSchema`, `evaluateVisibility`, `toZodRefine`                                                                                    | Declarative form config → Zod schema compiler      |
+
+### Usage
+
+```ts
+import {
+  formatDate,
+  required,
+  isEmail,
+  uuid,
+  defineFormSchema,
+} from "@mfe/platform-utils";
+import type {
+  FormConfig,
+  FieldDef,
+  ValidationResult,
+} from "@mfe/platform-utils";
+```
+
+## 22.3 @mfe/platform-ui
+
+**Location:** `packages/platform-ui/`
+**Dependencies:** `react-hook-form ^7.71.2`, `@hookform/resolvers ^5.2.2`, `react-select ^5.10.2`
+
+Shared React UI component library with a consistent theme system.
+
+### Components
+
+| Component          | Props Highlight                                   | Description                                        |
+| ------------------ | ------------------------------------------------- | -------------------------------------------------- |
+| **Button**         | `variant`, `size`, `loading`                      | Primary/secondary/ghost buttons with loading state |
+| **Input**          | `label`, `error`, `forwardRef`                    | Text input with label and error display            |
+| **TextArea**       | `label`, `error`, `rows`, `forwardRef`            | Multi-line text input                              |
+| **Checkbox**       | `label`, `error`, `forwardRef`                    | Checkbox with label and error                      |
+| **Select**         | `label`, `error`, `options`, `onChange(value)`    | Single-select dropdown (wraps react-select)        |
+| **MultiSelect**    | `label`, `error`, `options`, `onChange(values[])` | Multi-select dropdown                              |
+| **SmartSelect**    | `dataSource`, `dependsOn`, `dependencyValues`     | Advanced select with static/API data, cascading    |
+| **DatePicker**     | `label`, `error`, `min`, `max`                    | Native date input                                  |
+| **Table**          | `columns`, `data`, `rowKey`, `striped`            | Typed data table                                   |
+| **Modal**          | `open`, `onClose`, `title`, `footer`              | Dialog overlay                                     |
+| **Tabs**           | `tabs`, `defaultTab`                              | Tab-based navigation                               |
+| **Toast**          | `ToastContainer`, `showToast()`                   | Toast notifications                                |
+| **Loader**         | `size`, `label`, `overlay`                        | Loading spinner                                    |
+| **Form**           | `onSubmit`                                        | Form wrapper (prevents default)                    |
+| **FormGroup**      | —                                                 | Flex column wrapper for label+input+error          |
+| **FormRow**        | —                                                 | Horizontal row for side-by-side fields             |
+| **FormActions**    | —                                                 | Button row (submit/cancel)                         |
+| **FormField**      | `name`, `fieldDef`, `control`, `error`, `visible` | Polymorphic field renderer                         |
+| **FormBuilder**    | `config`, `layout`, `submitLabel`                 | Fully declarative form renderer                    |
+| **useFormBuilder** | hook                                              | RHF + Zod wiring for custom layouts                |
+
+### Usage
+
+```tsx
+import {
+  Button,
+  Input,
+  FormBuilder,
+  useFormBuilder,
+  showToast,
+} from "@mfe/platform-ui";
+import type { FormBuilderProps, FieldLayout } from "@mfe/platform-ui";
+```
+
+## 22.4 @mfe/platform-contracts
+
+**Location:** `packages/platform-contracts/`
+
+TypeScript interfaces for MFE mounting:
+
+```ts
+interface MountProps {
+  basePath?: string;
+  routePath?: string;
+  user?: MfeUser;
+  emitEvent?: <T>(event: string, detail: T) => void;
+  onEvent?: <T>(event: string, handler: (detail: T) => void) => () => void;
+}
+
+interface MfeUser {
+  id: string;
+  email: string;
+  displayName: string;
+}
+```
+
+## 22.5 @mfe/platform-events
+
+**Location:** `packages/platform-events/`
+
+Cross-MFE event bus for decoupled communication between Shell and remotes.
+
+## 22.6 @mfe/platform-core
+
+**Location:** `packages/platform-core/`
+
+Core infrastructure: API client, auth manager, config manager, error handler, HTTP interceptor, token manager.
+
+## 22.7 Adding a Platform Package to Your MFE
+
+```json
+// apps/your-mfe/package.json
+{
+  "dependencies": {
+    "@mfe/platform-ui": "0.1.0",
+    "@mfe/platform-utils": "0.1.0"
+  }
+}
+```
+
+Then run `npm install` from the workspace root. Import directly:
+
+```ts
+import { FormBuilder, showToast } from "@mfe/platform-ui";
+import { defineFormSchema, uuid } from "@mfe/platform-utils";
+```
+
+---
+
+# 23. Form Builder System
+
+## 23.1 Overview
+
+The Form Builder system provides a **declarative, config-driven approach** to creating forms in MFE applications. It eliminates boilerplate by replacing manual `useState` + imperative validation with a single configuration object.
+
+### Architecture
+
+```
+┌─────────────────────────────────────────────────────────┐
+│                  Developer writes                        │
+│                   FormConfig {}                          │
+│  (fields, rules, visibility, async, submit pipeline)    │
+└─────────────────────┬───────────────────────────────────┘
+                      │
+          ┌───────────▼───────────┐
+          │   defineFormSchema()   │   ← @mfe/platform-utils
+          │   Compiles to Zod     │
+          │   schema + metadata   │
+          └───────────┬───────────┘
+                      │
+    ┌─────────────────┼─────────────────┐
+    ▼                                   ▼
+┌─────────────┐              ┌──────────────────┐
+│ <FormBuilder│              │ useFormBuilder() │
+│   config=.. │              │   (hook-based)   │
+│ />          │              │                  │
+│             │              │ Returns: fields, │
+│ Zero-code   │              │ control, submit, │
+│ auto-render │              │ visibility, etc. │
+└──────┬──────┘              └────────┬─────────┘
+       │                              │
+       ▼                              ▼
+┌─────────────────────────────────────────────┐
+│          react-hook-form + zodResolver       │   ← @mfe/platform-ui
+│     <FormField> renders correct component    │
+│     per field type (Input, Select, etc.)     │
+└─────────────────────────────────────────────┘
+```
+
+### Two Usage Patterns
+
+| Pattern               | Component                             | Best For                          |
+| --------------------- | ------------------------------------- | --------------------------------- |
+| **Fully Declarative** | `<FormBuilder config={...} />`        | Standard forms, rapid development |
+| **Hook-based**        | `useFormBuilder(config)` + custom JSX | Complex layouts, multi-tab forms  |
+
+## 23.2 Quick Start
+
+### Simplest Possible Form
+
+```tsx
+import { FormBuilder, showToast } from "@mfe/platform-ui";
+import type { FormConfig } from "@mfe/platform-utils";
+
+const config: FormConfig = {
+  fields: {
+    name: {
+      type: "text",
+      label: "Name",
+      rules: [{ rule: "required" }],
+    },
+    email: {
+      type: "email",
+      label: "Email",
+      rules: [{ rule: "required" }, { rule: "email" }],
+    },
+    message: {
+      type: "textarea",
+      label: "Message",
+      rules: [{ rule: "required" }],
+    },
+  },
+  submit: {
+    action: async (values) => {
+      const response = await fetch("/api/contact", {
+        method: "POST",
+        body: JSON.stringify(values),
+      });
+      return response.json();
+    },
+    onSuccess: (_result, helpers) => {
+      helpers.reset();
+      helpers.showToast({ variant: "success", title: "Sent!" });
+    },
+  },
+};
+
+export const ContactPage = () => (
+  <FormBuilder
+    config={config}
+    submitLabel="Send Message"
+    showToast={(opts) => showToast({ ...opts, message: opts.message ?? "" })}
+  />
+);
+```
+
+**That's it.** No `useState`, no `onChange` handlers, no manual validation, no error state management.
+
+## 23.3 FormConfig Reference
+
+The `FormConfig` is the central configuration object:
+
+```ts
+interface FormConfig<TValues = Record<string, unknown>> {
+  fields: Record<string, FieldDef>; // Field name → definition
+  submit?: SubmitConfig<TValues>; // Submit pipeline
+}
+```
+
+### 23.3.1 Field Definition (FieldDef)
+
+```ts
+interface FieldDef {
+  type: FieldType; // "text" | "email" | "password" | "number" |
+  // "select" | "multiselect" | "smartselect" |
+  // "date" | "checkbox" | "textarea"
+  label: string; // Display label
+  defaultValue?: unknown; // Initial value
+  placeholder?: string; // Placeholder text
+  disabled?: boolean; // Disable the field
+  rules?: FieldRule[]; // Sync validation rules
+  dependsOn?: DependsOn | DependsOn[]; // Cross-field validations
+  visibleWhen?: VisibleWhen | VisibleWhen[]; // Conditional visibility
+  asyncValidation?: AsyncValidation; // Async server validation
+  componentProps?: Record<string, unknown>; // Pass-through to UI component
+}
+```
+
+### 23.3.2 Field Types → UI Component Mapping
+
+| Type            | Component                 | Notes                                                     |
+| --------------- | ------------------------- | --------------------------------------------------------- |
+| `"text"`        | `<Input type="text">`     | Standard text input with `forwardRef`                     |
+| `"email"`       | `<Input type="email">`    | Email input                                               |
+| `"password"`    | `<Input type="password">` | Password input                                            |
+| `"number"`      | `<Input type="number">`   | Numeric input (stored as string internally)               |
+| `"select"`      | `<Select>`                | Pass `options` via `componentProps`                       |
+| `"multiselect"` | `<MultiSelect>`           | Pass `options` via `componentProps`, value is `string[]`  |
+| `"smartselect"` | `<SmartSelect>`           | Pass `dataSource`, `dependsOn`, etc. via `componentProps` |
+| `"date"`        | `<DatePicker>`            | Native date input, value is `"YYYY-MM-DD"` string         |
+| `"checkbox"`    | `<Checkbox>`              | Boolean value                                             |
+| `"textarea"`    | `<TextArea>`              | Multi-line text with `forwardRef`                         |
+
+## 23.4 Validation Rules
+
+### 23.4.1 Built-in Rules
+
+Every rule optionally accepts a `message` override. If omitted, a sensible default is generated.
+
+```ts
+// Required — field must not be empty
+{ rule: "required" }
+{ rule: "required", message: "Please enter your name" }
+
+// String length
+{ rule: "minLength", params: 3 }
+{ rule: "maxLength", params: 200 }
+
+// Numeric range (for type: "number")
+{ rule: "min", params: 0 }
+{ rule: "max", params: 999999 }
+
+// Pattern (regex)
+{ rule: "pattern", params: /^[A-Z]/, message: "Must start with uppercase" }
+
+// Format validators
+{ rule: "email" }                    // email format
+{ rule: "url" }                      // URL format
+{ rule: "phone" }                    // phone number (7-15 digits)
+
+// Custom synchronous validator
+{
+  rule: "custom",
+  validate: (value) => {
+    if (value === "forbidden") return "This value is not allowed";
+    return true;    // true = valid, string = error message
+  }
+}
+```
+
+### 23.4.2 Cross-field Validation (dependsOn)
+
+Cross-field rules validate one field against another. They run via Zod's `superRefine` at the schema level.
+
+```ts
+// Password confirmation must match password
+{
+  dependsOn: {
+    field: "password",
+    rule: "matchField",
+    message: "Passwords do not match."
+  }
+}
+
+// End date must be after start date
+{
+  dependsOn: {
+    field: "startDate",
+    rule: "afterDate",
+    message: "End date must be after start date."
+  }
+}
+
+// Before date
+{
+  dependsOn: {
+    field: "endDate",
+    rule: "beforeDate"
+  }
+}
+
+// Numeric comparisons
+{
+  dependsOn: { field: "minPrice", rule: "greaterThan" }
+}
+{
+  dependsOn: { field: "maxPrice", rule: "lessThan" }
+}
+
+// Custom cross-field validation
+{
+  dependsOn: {
+    field: "country",
+    rule: "custom",
+    validate: (value, depValue, allValues) => {
+      if (depValue === "us" && !String(value).match(/^\d{5}$/)) {
+        return "US zip codes must be 5 digits";
+      }
+      return true;
+    }
+  }
+}
+
+// Multiple dependencies (AND — all must pass)
+{
+  dependsOn: [
+    { field: "startDate", rule: "afterDate" },
+    { field: "maxDate", rule: "beforeDate" }
+  ]
+}
+```
+
+### 23.4.3 Async Validation
+
+For server-side checks (e.g., "is this email already registered?"):
+
+```ts
+{
+  asyncValidation: {
+    validate: async (value, allFormValues) => {
+      const response = await fetch(`/api/check-email?email=${value}`);
+      const { available } = await response.json();
+      return available ? true : "This email is already taken.";
+    },
+    debounceMs: 500  // Wait 500ms after user stops typing (default: 400)
+  }
+}
+```
+
+**Behavior:**
+
+- Triggered on value change (debounced)
+- Empty values are skipped (use `required` rule for mandatory fields)
+- A "Checking…" indicator appears on the field during async validation
+- Returns `true` if valid, or an error message string if invalid
+- Receives `(value, allFormValues)` so you can build context-dependent checks
+
+### 23.4.4 Conditional Visibility (visibleWhen)
+
+Fields can be shown/hidden based on other field values:
+
+```ts
+// Show city only when country is selected (truthy)
+{
+  visibleWhen: { field: "country", operator: "truthy" }
+}
+
+// Show "other" input only when select value equals "other"
+{
+  visibleWhen: { field: "category", operator: "eq", value: "other" }
+}
+
+// Show field when value is NOT equal
+{
+  visibleWhen: { field: "role", operator: "neq", value: "viewer" }
+}
+
+// Show field when value is in a set
+{
+  visibleWhen: { field: "subject", operator: "in", value: ["support", "billing"] }
+}
+
+// Show field when value is NOT in a set
+{
+  visibleWhen: { field: "type", operator: "notIn", value: ["internal", "test"] }
+}
+
+// Custom visibility logic
+{
+  visibleWhen: {
+    field: "role",
+    operator: "custom",
+    test: (depValue, allValues) => depValue === "admin" && allValues.department === "engineering"
+  }
+}
+
+// Multiple conditions (ALL must be true — AND logic)
+{
+  visibleWhen: [
+    { field: "country", operator: "truthy" },
+    { field: "role", operator: "neq", value: "viewer" }
+  ]
+}
+```
+
+**Behavior:**
+
+- Hidden fields return `null` (not rendered at all)
+- Visibility is reactively computed on every keystroke via `useWatch`
+- Hidden fields still participate in the Zod schema (their values are preserved)
+
+## 23.5 Submit Pipeline
+
+The submit pipeline handles the full lifecycle: transform → confirm → action → success/error.
+
+```ts
+interface SubmitConfig<TValues, TResult> {
+  transform?: (values: TValues) => TValues | Record<string, unknown>;
+  action: (values: TValues) => Promise<TResult>;
+  onSuccess?: (result: TResult, helpers: SubmitHelpers) => void;
+  onError?: (error: unknown, helpers: SubmitHelpers) => void;
+  confirmMessage?: string;
+}
+
+interface SubmitHelpers {
+  reset: () => void;
+  showToast: (opts: {
+    variant: "success" | "error" | "info";
+    title: string;
+    message?: string;
+  }) => void;
+  navigate?: (path: string) => void;
+}
+```
+
+### Example: Full Pipeline
+
+```ts
+submit: {
+  // 1. Pre-submit transform (optional)
+  transform: (values) => ({
+    ...values,
+    amount: Number(values.amount),           // Convert string to number
+    email: String(values.email).toLowerCase() // Normalize email
+  }),
+
+  // 2. Confirmation prompt (optional)
+  confirmMessage: "Are you sure you want to submit this form?",
+
+  // 3. The actual submit action
+  action: async (values) => {
+    const response = await fetch("/api/payments", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(values),
+    });
+    if (!response.ok) throw new Error("Failed to create payment");
+    return response.json();
+  },
+
+  // 4. Success handler
+  onSuccess: (result, helpers) => {
+    helpers.reset();                        // Reset form to defaults
+    helpers.showToast({
+      variant: "success",
+      title: "Payment Created",
+      message: `Payment #${result.id} saved successfully.`
+    });
+    helpers.navigate?.("/payments");        // Navigate away
+  },
+
+  // 5. Error handler
+  onError: (error, helpers) => {
+    helpers.showToast({
+      variant: "error",
+      title: "Failed",
+      message: error instanceof Error ? error.message : "Unknown error"
+    });
+  },
+}
+```
+
+### Submit Flow Diagram
+
+```
+User clicks Submit
+       │
+       ▼
+┌─ Validation ──────────────────────────┐
+│  Zod schema validation (all rules)    │
+│  ┌─ Sync rules pass? ─────────────┐  │
+│  │  No → Show field errors         │  │
+│  │  Yes → Continue                  │  │
+│  └─────────────────────────────────┘  │
+└───────────────────┬───────────────────┘
+                    │  All valid
+                    ▼
+        ┌── confirmMessage? ──┐
+        │ Yes                No│
+        ▼                     │
+  ┌ Show Modal ┐              │
+  │ User Cancel│→ Stop        │
+  │ User OK    │──────────────┤
+  └────────────┘              │
+                    ▼         │
+            ┌── transform? ──┬┘
+            │  Yes: apply    │
+            └────────┬───────┘
+                     ▼
+              ┌── action() ──┐
+              │  (async)     │
+              │  API call    │
+              └──────┬───────┘
+              ┌──────┼───────┐
+              ▼              ▼
+          Success         Error
+              │              │
+              ▼              ▼
+         onSuccess()    onError()
+         (reset,toast,  (toast,log)
+          navigate)
+```
+
+## 23.6 componentProps — Passing Extra Props to UI Components
+
+The `componentProps` field lets you forward any extra props to the underlying platform-ui component:
+
+### Select Options
+
+```ts
+{
+  type: "select",
+  label: "Status",
+  componentProps: {
+    options: [
+      { value: "active", label: "Active" },
+      { value: "inactive", label: "Inactive" },
+    ],
+  },
+}
+```
+
+### MultiSelect Options
+
+```ts
+{
+  type: "multiselect",
+  label: "Tags",
+  componentProps: {
+    options: [
+      { value: "urgent", label: "Urgent" },
+      { value: "review", label: "Review" },
+    ],
+    searchable: true,
+  },
+}
+```
+
+### SmartSelect with Static Data
+
+```ts
+{
+  type: "smartselect",
+  label: "Country",
+  componentProps: {
+    dataSource: { type: "static", data: [{ id: "us", name: "USA" }, ...] },
+    valueField: "id",
+    textField: "name",
+  },
+}
+```
+
+### SmartSelect with API Data Source
+
+```ts
+{
+  type: "smartselect",
+  label: "Product",
+  componentProps: {
+    dataSource: {
+      type: "api",
+      url: "/api/products",
+      method: "GET",
+      resultKey: "items",
+    },
+    valueField: "productId",
+    textField: "productName",
+    searchable: true,
+  },
+}
+```
+
+### Cascading SmartSelects (Country → City)
+
+```ts
+// In FormConfig.fields:
+country: {
+  type: "smartselect",
+  label: "Country",
+  componentProps: {
+    dataSource: { type: "static", data: countryData },
+    valueField: "id",
+    textField: "name",
+  },
+},
+city: {
+  type: "smartselect",
+  label: "City",
+  visibleWhen: { field: "country", operator: "truthy" },
+  componentProps: {
+    dataSource: { type: "static", data: cityData },
+    dependsOn: "country",         // SmartSelect filters by this field
+    valueField: "id",
+    textField: "name",
+  },
+},
+```
+
+---
+
+# 24. Validation Utilities Reference
+
+## 24.1 Standalone Validators (@mfe/platform-utils)
+
+These validators exist in `validation-utils.ts` and return `ValidationResult`:
+
+```ts
+type ValidationResult = { valid: true } | { valid: false; message: string };
+```
+
+| Function         | Signature                                      | Description                           |
+| ---------------- | ---------------------------------------------- | ------------------------------------- |
+| `required`       | `(value, label?) → ValidationResult`           | Not null/undefined/empty-string       |
+| `isEmail`        | `(value) → ValidationResult`                   | Email regex check                     |
+| `minLength`      | `(value, min, label?) → ValidationResult`      | String minimum length                 |
+| `maxLength`      | `(value, max, label?) → ValidationResult`      | String maximum length                 |
+| `matchesPattern` | `(value, pattern, message) → ValidationResult` | Regex test                            |
+| `inRange`        | `(value, min, max, label?) → ValidationResult` | Number in range                       |
+| `validate`       | `(value, ...validators) → ValidationResult`    | Pipe validators, return first failure |
+| `isUrl`          | `(value) → ValidationResult`                   | URL validity                          |
+| `isPhone`        | `(value) → ValidationResult`                   | Phone (7-15 digits)                   |
+
+### Usage (Standalone — Without FormBuilder)
+
+```ts
+import { required, isEmail, validate } from "@mfe/platform-utils";
+
+const result = validate(
+  userInput,
+  (v) => required(v, "Email"),
+  (v) => isEmail(v as string),
+);
+
+if (!result.valid) {
+  console.error(result.message);
+}
+```
+
+### Usage (As Zod Refine — Bridge)
+
+```ts
+import { required, toZodRefine } from "@mfe/platform-utils";
+import { z } from "zod/v4";
+
+const schema = z.object({
+  name: z.string().refine(...toZodRefine(required, "Name")),
+});
+```
+
+## 24.2 FormSchema Validation (Used by FormBuilder)
+
+When you define a `FormConfig`, the `defineFormSchema()` function compiles your rules into a Zod schema automatically. You do **not** need to write Zod schemas manually.
+
+```ts
+import { defineFormSchema } from "@mfe/platform-utils";
+
+const { schema, fieldsMeta, defaultValues, submitConfig } = defineFormSchema({
+  fields: {
+    email: {
+      type: "email",
+      label: "Email",
+      rules: [{ rule: "required" }, { rule: "email" }],
+    },
+  },
+});
+
+// schema is a z.ZodObject — you can use it directly with react-hook-form
+// or anywhere else you need Zod validation
+```
+
+---
+
+# 25. FormBuilder API Reference
+
+## 25.1 `<FormBuilder>` Component
+
+**Import:** `import { FormBuilder } from "@mfe/platform-ui";`
+
+### Props
+
+| Prop              | Type                                      | Default            | Description                            |
+| ----------------- | ----------------------------------------- | ------------------ | -------------------------------------- |
+| `config`          | `FormConfig \| FormSchemaResult`          | _required_         | The form definition                    |
+| `layout`          | `FieldLayout[]`                           | auto (1 field/row) | Row layout specification               |
+| `submitLabel`     | `string`                                  | `"Submit"`         | Submit button text                     |
+| `submittingLabel` | `string`                                  | `"Submitting…"`    | Button text during submit              |
+| `onCancel`        | `() => void`                              | —                  | Shows cancel button if provided        |
+| `cancelLabel`     | `string`                                  | `"Cancel"`         | Cancel button text                     |
+| `navigate`        | `(path: string) => void`                  | —                  | Navigation function for submit helpers |
+| `showToast`       | `(opts) => void`                          | —                  | Toast function for submit helpers      |
+| `className`       | `string`                                  | —                  | Extra CSS class on `<Form>`            |
+| `style`           | `CSSProperties`                           | —                  | Inline style on `<Form>`               |
+| `children`        | `(fb: UseFormBuilderReturn) => ReactNode` | —                  | Render prop for custom rendering       |
+
+### Layout Specification
+
+```ts
+type FieldLayout = string | string[];
+
+// Examples:
+layout={[
+  ["firstName", "lastName"],    // Two fields side-by-side
+  "email",                      // Single field in its own row
+  ["city", "state", "zip"],     // Three fields in one row
+]}
+```
+
+If `layout` is omitted, each field renders as its own row in the order they appear in `config.fields`.
+
+### Render Prop Usage
+
+For ultimate flexibility, use the `children` render prop:
+
+```tsx
+<FormBuilder config={config}>
+  {(fb) => (
+    <div className="my-custom-layout">
+      <FormField name="email" {...fb.fields.email} control={fb.control} />
+      <button onClick={fb.handleSubmit}>Go</button>
+    </div>
+  )}
+</FormBuilder>
+```
+
+## 25.2 `useFormBuilder()` Hook
+
+**Import:** `import { useFormBuilder } from "@mfe/platform-ui";`
+
+```ts
+const fb = useFormBuilder(config, {
+  navigate: (path) => router.push(path),
+  showToast: (opts) => showToast({ ...opts, message: opts.message ?? "" }),
+});
+```
+
+### Return Value
+
+| Property         | Type                               | Description                                    |
+| ---------------- | ---------------------------------- | ---------------------------------------------- |
+| `fields`         | `Record<string, FormFieldBinding>` | Per-field binding objects                      |
+| `fieldNames`     | `string[]`                         | Ordered field names                            |
+| `form`           | `UseFormReturn`                    | Raw react-hook-form instance (escape hatch)    |
+| `control`        | `Control`                          | RHF control for `<Controller>` / `<FormField>` |
+| `handleSubmit`   | `(e?) => void`                     | Wrapped submit (runs full pipeline)            |
+| `isSubmitting`   | `boolean`                          | Whether submit action is in progress           |
+| `isConfirmOpen`  | `boolean`                          | Whether confirmation modal is showing          |
+| `confirmSubmit`  | `() => void`                       | Confirm the pending submit                     |
+| `cancelConfirm`  | `() => void`                       | Cancel the pending submit                      |
+| `confirmMessage` | `string \| undefined`              | Confirm message text                           |
+| `reset`          | `() => void`                       | Reset form to defaults                         |
+| `submitError`    | `string \| null`                   | Non-field submit error message                 |
+
+### FormFieldBinding Shape
+
+```ts
+interface FormFieldBinding {
+  name: string;
+  fieldDef: FieldDef;
+  error?: FieldError;
+  visible: boolean;
+  asyncValidating: boolean;
+}
+```
+
+### Hook-based Custom Layout Example
+
+```tsx
+import {
+  useFormBuilder,
+  FormField,
+  Form,
+  FormGroup,
+  FormRow,
+  FormActions,
+  Button,
+} from "@mfe/platform-ui";
+
+const MyForm = () => {
+  const fb = useFormBuilder(config, { showToast });
+
+  return (
+    <Form onSubmit={fb.handleSubmit}>
+      <FormRow>
+        <FormGroup>
+          <FormField
+            name="firstName"
+            fieldDef={fb.fields.firstName.fieldDef}
+            control={fb.control}
+            error={fb.fields.firstName.error}
+            visible={fb.fields.firstName.visible}
+          />
+        </FormGroup>
+        <FormGroup>
+          <FormField
+            name="lastName"
+            fieldDef={fb.fields.lastName.fieldDef}
+            control={fb.control}
+            error={fb.fields.lastName.error}
+            visible={fb.fields.lastName.visible}
+          />
+        </FormGroup>
+      </FormRow>
+
+      <FormActions>
+        <Button type="submit" loading={fb.isSubmitting}>
+          Submit
+        </Button>
+      </FormActions>
+    </Form>
+  );
+};
+```
+
+## 25.3 `<FormField>` Component
+
+**Import:** `import { FormField } from "@mfe/platform-ui";`
+
+Polymorphic field renderer that maps `FieldDef.type` to the correct platform-ui component.
+
+| Prop              | Type         | Description                        |
+| ----------------- | ------------ | ---------------------------------- |
+| `name`            | `string`     | Field name                         |
+| `fieldDef`        | `FieldDef`   | Field definition                   |
+| `control`         | `Control`    | RHF control                        |
+| `error`           | `FieldError` | Field error object                 |
+| `visible`         | `boolean`    | Whether to render (default `true`) |
+| `asyncValidating` | `boolean`    | Show "Checking…" indicator         |
+
+## 25.4 `<Checkbox>` Component
+
+**Import:** `import { Checkbox } from "@mfe/platform-ui";`
+
+```tsx
+<Checkbox
+  label="I agree to the terms"
+  checked={value}
+  onChange={(e) => setValue(e.target.checked)}
+  error="You must agree"
+/>
+```
+
+Supports `React.forwardRef<HTMLInputElement>`.
+
+## 25.5 `<TextArea>` Component
+
+**Import:** `import { TextArea } from "@mfe/platform-ui";`
+
+```tsx
+<TextArea
+  label="Comments"
+  placeholder="Write something…"
+  rows={6}
+  value={text}
+  onChange={(e) => setText(e.target.value)}
+  error="Too short"
+/>
+```
+
+Supports `React.forwardRef<HTMLTextAreaElement>`.
+
+---
+
+# 26. Migration Guide: Manual Forms → FormBuilder
+
+## 26.1 Before (Manual State + Imperative Validation)
+
+```tsx
+// ❌ OLD PATTERN — 8 useState calls, manual validation, ~300 lines
+const [customer, setCustomer] = useState("");
+const [amount, setAmount] = useState("");
+const [status, setStatus] = useState("");
+const [tags, setTags] = useState<string[]>([]);
+const [dueDate, setDueDate] = useState("");
+const [country, setCountry] = useState("");
+const [city, setCity] = useState("");
+const [notes, setNotes] = useState("");
+const [errors, setErrors] = useState<Record<string, string>>({});
+
+const validate = (): boolean => {
+  const e: Record<string, string> = {};
+  if (!customer.trim()) e.customer = "Customer name is required";
+  if (!amount.trim()) e.amount = "Amount is required";
+  else if (isNaN(Number(amount)) || Number(amount) <= 0) e.amount = "Enter a positive amount";
+  if (!status) e.status = "Select a status";
+  if (!dueDate) e.dueDate = "Due date is required";
+  if (!country) e.country = "Select a country";
+  if (!city) e.city = "Select a city";
+  setErrors(e);
+  return Object.keys(e).length === 0;
+};
+
+// Then manually wiring up inputs:
+<Input value={customer} onChange={(e) => setCustomer(e.target.value)} error={errors.customer} />
+<Input value={amount} onChange={(e) => setAmount(e.target.value)} error={errors.amount} />
+// ... 6 more fields ...
+```
+
+## 26.2 After (FormBuilder — Declarative Config)
+
+```tsx
+// ✅ NEW PATTERN — Single config object, ~80 lines
+import { FormBuilder, showToast } from "@mfe/platform-ui";
+import type { FormConfig, FieldLayout } from "@mfe/platform-ui";
+
+const config: FormConfig = {
+  fields: {
+    customer: {
+      type: "text",
+      label: "Customer",
+      rules: [{ rule: "required" }],
+    },
+    amount: {
+      type: "number",
+      label: "Amount",
+      rules: [{ rule: "required" }, { rule: "min", params: 0.01 }],
+    },
+    status: {
+      type: "select",
+      label: "Status",
+      rules: [{ rule: "required" }],
+      componentProps: { options: statusOptions },
+    },
+    dueDate: { type: "date", label: "Due Date", rules: [{ rule: "required" }] },
+    country: {
+      type: "smartselect",
+      label: "Country",
+      rules: [{ rule: "required" }],
+      componentProps: { dataSource, valueField: "id", textField: "name" },
+    },
+    city: {
+      type: "smartselect",
+      label: "City",
+      rules: [{ rule: "required" }],
+      visibleWhen: { field: "country", operator: "truthy" },
+      componentProps: { dataSource: cityData, dependsOn: "country" },
+    },
+    tags: {
+      type: "multiselect",
+      label: "Tags",
+      componentProps: { options: tagOptions },
+    },
+    notes: { type: "textarea", label: "Notes" },
+  },
+  submit: {
+    confirmMessage: "Submit this payment?",
+    action: async (values) =>
+      fetch("/api/payments", {
+        method: "POST",
+        body: JSON.stringify(values),
+      }).then((r) => r.json()),
+    onSuccess: (_, helpers) => {
+      helpers.reset();
+      helpers.showToast({ variant: "success", title: "Saved!" });
+    },
+  },
+};
+
+const layout: FieldLayout[] = [
+  ["customer", "amount"],
+  ["status", "dueDate"],
+  ["country", "city"],
+  ["tags", "notes"],
+];
+
+<FormBuilder
+  config={config}
+  layout={layout}
+  submitLabel="Create Payment"
+  showToast={showToast}
+/>;
+```
+
+## 26.3 Migration Steps
+
+1. **Add dependency**: Add `"@mfe/platform-utils": "0.1.0"` to your MFE's `package.json` (if not already present). Run `npm install`.
+
+2. **Define config**: Convert each `useState` field into a `FieldDef` entry in the config's `fields` object. Map existing validation `if/else` checks to `rules[]`.
+
+3. **Define layout**: Group field names into arrays for side-by-side rendering, or omit `layout` for one-field-per-row.
+
+4. **Define submit**: Move your submit logic into `submit.action`, confirmation modal to `submit.confirmMessage`, success/error handling to callbacks.
+
+5. **Replace JSX**: Replace all manual `<Input>`, `<Select>`, etc. with a single `<FormBuilder config={...} layout={...} />`.
+
+6. **Delete state**: Remove all `useState` calls for form fields and errors.
+
+## 26.4 When to Use Hook vs Component
+
+| Use `<FormBuilder>` when: | Use `useFormBuilder()` when:            |
+| ------------------------- | --------------------------------------- |
+| Standard form layout      | Tabs-based or multi-section layout      |
+| Rapid prototyping         | Mixing form fields with custom UI       |
+| Consistency across team   | Conditional sections beyond field-level |
+| Simple CRUD forms         | Need direct access to RHF methods       |
+
+## 26.5 Demo Page
+
+A comprehensive demo page is available at the CBMS `/demo` route, accessible via the **"🧩 FormBuilder Demo"** button on the Payments list page. It showcases:
+
+- **Demo 1 (Full Declarative)**: All field types, all validation rules, async validation, cross-field validation, conditional visibility, cascading selects, confirmation modal, submit pipeline
+- **Demo 2 (Hook-based)**: Custom layout with `useFormBuilder()` + manual `<FormField>` placement
+- **Demo 3 (Minimal)**: Three-field form with zero layout config
+
+---
+
 # Appendix A: Glossary
 
 | Term                     | Definition                                                           |
@@ -2592,12 +3709,13 @@ const fetchWithAuth = async <T>(url: string): Promise<T> => {
 
 # Appendix B: Version History
 
-| Version | Date       | Changes                                               |
-| ------- | ---------- | ----------------------------------------------------- |
-| 0.1.0   | Initial    | Vite-only federation architecture                     |
-| 0.2.0   | March 2026 | Added BFF with auth flow, dynamic shell configuration |
+| Version | Date       | Changes                                                                                                                                                                                      |
+| ------- | ---------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 0.1.0   | Initial    | Vite-only federation architecture                                                                                                                                                            |
+| 0.2.0   | March 2026 | Added BFF with auth flow, dynamic shell configuration                                                                                                                                        |
+| 0.3.0   | July 2025  | Form Builder system: `defineFormSchema`, `useFormBuilder`, `<FormBuilder>`, `<FormField>`, `<Checkbox>`, `<TextArea>`, async/cross-field validation, submit pipeline, conditional visibility |
 
 ---
 
-_Document generated: March 4, 2026_
-_Platform Version: 0.2.0_
+_Document generated: July 2025_
+_Platform Version: 0.3.0_

@@ -1,0 +1,28 @@
+/* ── FormField ──────────────────────────────────────────────────────────────── */
+
+.pui-form-field {
+  position: relative;
+}
+
+.pui-form-field__async-indicator {
+  position: absolute;
+  right: var(--pui-space-sm);
+  bottom: var(--pui-space-sm);
+  font-size: var(--pui-font-size-sm);
+  color: var(--pui-text-muted);
+  animation: pui-ff-pulse 1s ease-in-out infinite;
+}
+
+@keyframes pui-ff-pulse {
+  0%, 100% { opacity: 0.5; }
+  50% { opacity: 1; }
+}
+
+.pui-form-field--unknown {
+  padding: var(--pui-space-md);
+  background: var(--pui-warning-bg, #fff3cd);
+  border: 1px dashed var(--pui-warning, #ffc107);
+  border-radius: var(--pui-radius-md);
+  font-size: var(--pui-font-size-sm);
+  color: var(--pui-warning-text, #856404);
+}

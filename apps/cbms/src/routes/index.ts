@@ -6,6 +6,7 @@
 
 export type CbmsRoute =
   | { name: "create" }
+  | { name: "demo" }
   | { name: "detail"; paymentId: number; page: number }
   | { name: "list"; page: number };
 
@@ -15,6 +16,9 @@ const parsePage = (search: string): number => {
 };
 
 export const matchRoute = (pathname: string, search: string): CbmsRoute => {
+  if (pathname.endsWith("/demo")) {
+    return { name: "demo" };
+  }
   if (pathname.endsWith("/create")) {
     return { name: "create" };
   }

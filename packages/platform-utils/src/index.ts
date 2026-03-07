@@ -51,6 +51,25 @@ export {
   formatBytes,
 } from "./format-utils";
 
+// ── FormSchema ────────────────────────────────────────────────────────────────
+export {
+  defineFormSchema,
+  evaluateVisibility,
+  toZodRefine,
+} from "./form-schema";
+export type {
+  FieldType,
+  FieldRule,
+  FieldDef,
+  DependsOn,
+  VisibleWhen,
+  AsyncValidation,
+  SubmitConfig,
+  SubmitHelpers,
+  FormConfig,
+  FormSchemaResult,
+} from "./form-schema";
+
 // ── EncryptionUtils ───────────────────────────────────────────────────────────
 export {
   base64Encode,

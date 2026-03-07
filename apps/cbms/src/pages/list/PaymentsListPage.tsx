@@ -50,13 +50,22 @@ export default function PaymentsListPage({ basePath, currentPage, goTo, onEvent 
     <div className="mfe">
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <h2>Payments Listing</h2>
-        <button
-          className="button"
-          style={{ background: "#de1621", color: "#fff", border: "none", borderRadius: 6, padding: "8px 16px", cursor: "pointer" }}
-          onClick={() => goTo(`${basePath}/create`)}
-        >
-          + Create Payment
-        </button>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button
+            className="button"
+            style={{ background: "#1a73e8", color: "#fff", border: "none", borderRadius: 6, padding: "8px 16px", cursor: "pointer" }}
+            onClick={() => goTo(`${basePath}/demo`)}
+          >
+            🧩 FormBuilder Demo
+          </button>
+          <button
+            className="button"
+            style={{ background: "#de1621", color: "#fff", border: "none", borderRadius: 6, padding: "8px 16px", cursor: "pointer" }}
+            onClick={() => goTo(`${basePath}/create`)}
+          >
+            + Create Payment
+          </button>
+        </div>
       </div>
 
       {highlightedCustomer && (

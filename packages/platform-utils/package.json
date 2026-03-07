@@ -2,5 +2,8 @@
   "name": "@mfe/platform-utils",
   "version": "0.1.0",
   "type": "module",
-  "main": "src/index.ts"
+  "main": "src/index.ts",
+  "dependencies": {
+    "zod": "^4.3.6"
+  }
 }

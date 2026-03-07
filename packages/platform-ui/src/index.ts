@@ -62,3 +62,21 @@ export type {
   ApiDataSource,
   StaticDataSource,
 } from "./components/SmartSelect";
+
+// ── New: Checkbox, TextArea, FormField, FormBuilder ───────────────────────
+export { Checkbox } from "./components/Checkbox";
+export type { CheckboxProps } from "./components/Checkbox";
+
+export { TextArea } from "./components/TextArea";
+export type { TextAreaProps } from "./components/TextArea";
+
+export { FormField } from "./components/FormField";
+export type { FormFieldProps } from "./components/FormField";
+
+export { FormBuilder, useFormBuilder } from "./components/FormBuilder";
+export type {
+  FormBuilderProps,
+  FieldLayout,
+  UseFormBuilderReturn,
+  FormFieldBinding,
+} from "./components/FormBuilder";
